@@ -36,7 +36,7 @@ def load_skab_dataset(dataset_config: dict, raw_data_path: str | Path) -> pd.Dat
             raise FileNotFoundError(f"No CSV files found under: {valve_path}")
 
         for csv_path in csv_files:
-            frame = pd.read_csv(csv_path)
+            frame = pd.read_csv(csv_path, sep=";")
             frame["source_group"] = valve_folder
             frame["source_file"] = csv_path.stem
             frames.append(frame)

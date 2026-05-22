@@ -32,9 +32,12 @@ datasets:
     group_column: "source_file"
 
   batadal:
-    train_file: "BATADAL_dataset03.csv"
+    train_file: "BATADAL_dataset04.csv"
 
     target_column: "ATT_FLAG"
+
+    normal_label_value: -999
+    anomaly_label_value: 1
 
     drop_columns:
       - "DATETIME"
