@@ -4,12 +4,14 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from models.automata.explainability import ExplainabilityEngine
 from models.automata.paa import PAATransformer
 from models.automata.probability_engine import ProbabilityEngine
 from models.automata.sax import SAXTransformer
 from models.automata.sliding_window import SlidingWindow
 from models.automata.state_generator import StateGenerator
 from models.automata.transition_matrix import TransitionMatrixBuilder
+from models.automata.unseen_handler import PatternResolution, UnseenPatternHandler
 
 
 @dataclass
@@ -18,6 +20,7 @@ class AutomataArtifacts:
     symbols: list[str]
     patterns: list[str]
     states: list[int]
+    resolutions: list[PatternResolution]
 
 
 class ProbabilisticAutomataModel:
@@ -31,6 +34,7 @@ class ProbabilisticAutomataModel:
         stride: int = 1,
         smoothing: bool = True,
         epsilon: float = 1e-4,
+        anomaly_threshold: float = 0.1,
     ):
         self.paa = PAATransformer(window_size=paa_window_size)
         self.sax = SAXTransformer(alphabet_size=alphabet_size)
@@ -38,6 +42,9 @@ class ProbabilisticAutomataModel:
         self.state_generator = StateGenerator()
         self.transition_builder = TransitionMatrixBuilder()
         self.probability_engine = ProbabilityEngine(smoothing=smoothing, epsilon=epsilon)
+        self.unseen_handler = UnseenPatternHandler()
+        self.explainability_engine = ExplainabilityEngine()
+        self.anomaly_threshold = anomaly_threshold
 
         self.transition_counts_: dict[int, dict[int, int]] | None = None
         self.transition_probabilities_: dict[int, dict[int, float]] | None = None
@@ -50,15 +57,28 @@ class ProbabilisticAutomataModel:
             raise ValueError("Not enough symbolic values to create automata patterns")
 
         if self.state_generator.pattern_to_state:
-            states = self.state_generator.transform(patterns)
+            known_patterns = list(self.state_generator.pattern_to_state)
+            resolutions = [self.unseen_handler.resolve(pattern, known_patterns) for pattern in patterns]
+            states = [self.state_generator.pattern_to_state[resolution.mapped_pattern] for resolution in resolutions]
         else:
             states = self.state_generator.fit_transform(patterns)
+            resolutions = [
+                PatternResolution(
+                    original_pattern=pattern,
+                    status="seen",
+                    mapped_pattern=pattern,
+                    distance=0,
+                    confidence_score=1.0,
+                )
+                for pattern in patterns
+            ]
 
         return AutomataArtifacts(
             paa_values=paa_values,
             symbols=symbols,
             patterns=patterns,
             states=states,
+            resolutions=resolutions,
         )
 
     def fit(self, series: np.ndarray | list[float]) -> "ProbabilisticAutomataModel":
@@ -94,4 +114,10 @@ class ProbabilisticAutomataModel:
             "average_log_probability": average_log_probability,
             "patterns": artifacts.patterns,
             "states": artifacts.states,
+            "explanations": self.explainability_engine.build(
+                resolutions=artifacts.resolutions,
+                states=artifacts.states,
+                transition_probabilities=self.transition_probabilities_,
+                anomaly_threshold=self.anomaly_threshold,
+            ),
         }
