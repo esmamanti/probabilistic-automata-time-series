@@ -1,0 +1,32 @@
+project:
+  name: "time-series-automata-explainability"
+
+random_seeds:
+  - 42
+  - 123
+  - 2026
+  - 7
+  - 999
+
+training:
+  batch_size: 32
+  epochs: 50
+  patience: 5
+  learning_rate: 0.001
+
+preprocessing:
+  normalize: true
+  apply_pca: true
+  pca_components: 1
+
+automata:
+  window_size: 4
+  alphabet_size: 3
+
+experiments:
+  noise_std: 0.05
+
+paths:
+  skab: "data/raw/SKAB"
+  batadal: "data/raw/BATADAL"
+  results: "results/"
