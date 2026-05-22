@@ -1,11 +1,18 @@
 import random
 import numpy as np
-import torch
+
+try:
+    import torch
+except ImportError:  # pragma: no cover - optional dependency during early project setup
+    torch = None
 
 def set_seed(seed: int):
     random.seed(seed)
 
     np.random.seed(seed)
+
+    if torch is None:
+        return
 
     torch.manual_seed(seed)
 

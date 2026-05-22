@@ -1,32 +1,62 @@
 project:
-  name: "time-series-automata-explainability"
-
-random_seeds:
-  - 42
-  - 123
-  - 2026
-  - 7
-  - 999
-
-training:
-  batch_size: 32
-  epochs: 50
-  patience: 5
-  learning_rate: 0.001
-
-preprocessing:
-  normalize: true
-  apply_pca: true
-  pca_components: 1
-
-automata:
-  window_size: 4
-  alphabet_size: 3
-
-experiments:
-  noise_std: 0.05
+  name: "probabilistic-automata-time-series"
+  random_seeds: [42, 123, 2026, 7, 999]
+  device: "cuda"
 
 paths:
-  skab: "data/raw/SKAB"
-  batadal: "data/raw/BATADAL"
-  results: "results/"
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+  split_data: "data/splits"
+
+  results: "results"
+  logs: "results/logs"
+  figures: "results/figures"
+  tables: "results/tables"
+  explanations: "results/explanations"
+
+datasets:
+
+  skab:
+    valve_folders:
+      - "valve1"
+      - "valve2"
+
+    target_column: "anomaly"
+
+    drop_columns:
+      - "datetime"
+      - "changepoint"
+      - "source_group"
+      - "source_file"
+
+    group_column: "source_file"
+
+  batadal:
+    train_file: "BATADAL_dataset03.csv"
+
+    target_column: "ATT_FLAG"
+
+    drop_columns:
+      - "DATETIME"
+
+    split:
+      train: 0.6
+      validation: 0.2
+      test: 0.2
+
+preprocessing:
+
+  scaler: "standard"
+
+  pca:
+    enabled: true
+    n_components: 1
+
+noise:
+  enabled: true
+  gaussian_mean: 0.0
+  gaussian_std: 0.05
+
+logging:
+  save_logs: true
+  log_level: "INFO"

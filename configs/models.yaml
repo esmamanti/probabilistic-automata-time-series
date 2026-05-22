@@ -1,0 +1,55 @@
+deep_learning:
+
+  lstm:
+    input_size: 1
+    hidden_size: 64
+    num_layers: 2
+    dropout: 0.2
+    output_size: 1
+    learning_rate: 0.001
+
+  gru:
+    input_size: 1
+    hidden_size: 64
+    num_layers: 2
+    dropout: 0.2
+    output_size: 1
+    learning_rate: 0.001
+
+  cnn:
+    input_channels: 1
+    num_filters: 64
+    kernel_size: 3
+    dropout: 0.2
+    learning_rate: 0.001
+
+training:
+
+  batch_size: 32
+  epochs: 50
+
+  early_stopping:
+    enabled: true
+    patience: 5
+
+  optimizer: "adam"
+
+automata:
+
+  paa:
+    window_size: 4
+
+  sax:
+    alphabet_size: 3
+
+  sliding_window:
+    size: 4
+    stride: 1
+
+  unseen_pattern:
+    enabled: true
+    method: "levenshtein"
+
+  probability:
+    smoothing: true
+    epsilon: 0.0001

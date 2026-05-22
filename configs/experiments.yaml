@@ -1,0 +1,52 @@
+experiments:
+
+  original_data:
+    enabled: true
+
+  noisy_data:
+    enabled: true
+
+  unseen_data:
+    enabled: true
+
+  parameter_analysis:
+    enabled: true
+
+    window_sizes:
+      - 3
+      - 4
+      - 5
+      - 6
+
+    alphabet_sizes:
+      - 3
+      - 4
+      - 5
+      - 6
+
+cross_dataset:
+  enabled: true
+
+evaluation:
+
+  metrics:
+    - accuracy
+    - precision
+    - recall
+    - f1_score
+
+  statistical_tests:
+    - wilcoxon
+
+plots:
+  confusion_matrix: true
+  roc_curve: true
+  precision_recall_curve: true
+  automata_state_diagram: true
+  transition_heatmap: true
+  parameter_sensitivity_plot: true
+
+output:
+  save_metrics_csv: true
+  save_figures: true
+  save_explanations_json: true
