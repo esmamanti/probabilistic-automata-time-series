@@ -31,6 +31,11 @@ datasets:
 
     group_column: "source_file"
 
+    split:
+      train: 0.6
+      validation: 0.2
+      test: 0.2
+
   batadal:
     train_file: "BATADAL_dataset04.csv"
 
@@ -54,6 +59,9 @@ preprocessing:
   pca:
     enabled: true
     n_components: 1
+
+  sequence_length: 16
+  sequence_stride: 1
 
 noise:
   enabled: true
