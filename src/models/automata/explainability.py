@@ -14,6 +14,7 @@ class ExplainabilityEngine:
         anomaly_threshold: float,
     ) -> list[dict[str, object]]:
         explanations: list[dict[str, object]] = []
+        cumulative_probability = 1.0
 
         for time_step, resolution in enumerate(resolutions):
             previous_state = states[time_step - 1] if time_step > 0 else None
@@ -24,16 +25,31 @@ class ExplainabilityEngine:
             else:
                 probability = transition_probabilities.get(previous_state, {}).get(current_state, 0.0)
 
-            is_anomaly = resolution.status == "unseen" or probability < anomaly_threshold
+            cumulative_probability *= probability
+            if resolution.status == "unseen":
+                decision_reason = "unseen_pattern"
+                is_anomaly = True
+            elif probability < anomaly_threshold:
+                decision_reason = "low_transition_probability"
+                is_anomaly = True
+            else:
+                decision_reason = "expected_transition"
+                is_anomaly = False
+
             explanations.append(
                 {
                     "time_step": time_step,
-                    "state": resolution.original_pattern,
+                    "state": current_state,
+                    "previous_state": previous_state,
                     "pattern": resolution.original_pattern,
                     "status": resolution.status,
                     "mapped_to": resolution.mapped_pattern,
+                    "distance": resolution.distance,
+                    "transition_probability": float(probability),
                     "probability": float(probability),
+                    "path_probability": float(cumulative_probability),
                     "confidence_score": float(resolution.confidence_score),
+                    "decision_reason": decision_reason,
                     "decision": "anomaly" if is_anomaly else "normal",
                 }
             )
