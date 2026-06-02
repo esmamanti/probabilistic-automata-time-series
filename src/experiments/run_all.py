@@ -13,6 +13,7 @@ from data.load_batadal import load_batadal_dataset
 from data.load_skab import load_skab_dataset
 from data.split import generate_skab_group_folds
 from utils.config import load_config
+from utils.seed import get_primary_seed
 
 
 def summarize_skab(config: dict) -> None:
@@ -52,7 +53,7 @@ def summarize_skab(config: dict) -> None:
                 group_column=group_column,
                 target_column=target_column,
                 n_splits=fold_count,
-                random_state=config["project"]["random_seeds"][0],
+                random_state=get_primary_seed(config),
             )
         )
         _, train_idx, test_idx = first_fold

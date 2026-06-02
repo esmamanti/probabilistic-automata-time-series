@@ -20,6 +20,7 @@ from data.preprocessing.preprocessing_pipeline import PreprocessingPipeline
 from data.split import generate_skab_group_folds, split_batadal_by_time, split_features_and_target
 from models.automata.automata_model import ProbabilisticAutomataModel
 from utils.config import load_config
+from utils.seed import clone_config_with_seed, get_experiment_seeds, get_primary_seed
 
 
 def ensure_output_dirs(config: dict) -> tuple[Path, Path]:
@@ -286,7 +287,7 @@ def run_skab_experiment(config: dict, models_config: dict) -> tuple[pd.DataFrame
         group_column=group_column,
         target_column=target_column,
         n_splits=fold_count,
-        random_state=config["project"]["random_seeds"][0],
+        random_state=get_primary_seed(config),
     ):
         train_df = dataset.iloc[train_idx].reset_index(drop=True)
         test_df = dataset.iloc[test_idx].reset_index(drop=True)
@@ -380,9 +381,28 @@ def main() -> None:
     config = load_config(PROJECT_ROOT / "configs" / "config.yaml")
     models_config = load_config(PROJECT_ROOT / "configs" / "models.yaml")
     explanations_dir, tables_dir = ensure_output_dirs(config)
+    all_skab_explanations: list[pd.DataFrame] = []
+    all_skab_metrics: list[pd.DataFrame] = []
+    all_batadal_explanations: list[pd.DataFrame] = []
+    all_batadal_metrics: list[pd.DataFrame] = []
 
-    skab_explanations, skab_metrics = run_skab_experiment(config, models_config)
-    batadal_explanations, batadal_metrics = run_batadal_experiment(config, models_config)
+    for seed in get_experiment_seeds(config):
+        seed_config = clone_config_with_seed(config, seed)
+        skab_explanations, skab_metrics = run_skab_experiment(seed_config, models_config)
+        batadal_explanations, batadal_metrics = run_batadal_experiment(seed_config, models_config)
+        skab_explanations["seed"] = int(seed)
+        skab_metrics["seed"] = int(seed)
+        batadal_explanations["seed"] = int(seed)
+        batadal_metrics["seed"] = int(seed)
+        all_skab_explanations.append(skab_explanations)
+        all_skab_metrics.append(skab_metrics)
+        all_batadal_explanations.append(batadal_explanations)
+        all_batadal_metrics.append(batadal_metrics)
+
+    skab_explanations = pd.concat(all_skab_explanations, ignore_index=True)
+    skab_metrics = pd.concat(all_skab_metrics, ignore_index=True)
+    batadal_explanations = pd.concat(all_batadal_explanations, ignore_index=True)
+    batadal_metrics = pd.concat(all_batadal_metrics, ignore_index=True)
     save_outputs(
         explanations_dir=explanations_dir,
         tables_dir=tables_dir,

@@ -14,6 +14,7 @@ if str(SRC_ROOT) not in sys.path:
 from data.data_module import DataModule
 from experiments.run_automata import build_automata_model, derive_pattern_labels, extract_1d_series
 from utils.config import load_config
+from utils.seed import clone_config_with_seed, get_experiment_seeds
 
 
 def ensure_output_dirs(config: dict) -> tuple[Path, Path]:
@@ -24,7 +25,7 @@ def ensure_output_dirs(config: dict) -> tuple[Path, Path]:
     return explanations_dir, tables_dir
 
 
-def analyze_unseen_for_dataset(dataset_name: str, config: dict, models_config: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
+def analyze_unseen_for_dataset(dataset_name: str, config: dict, models_config: dict, seed: int) -> tuple[pd.DataFrame, pd.DataFrame]:
     data_module = DataModule(config)
     prepared_dataset = data_module.prepare_dataset(dataset_name, scenario="original")
     model = build_automata_model(models_config)
@@ -47,6 +48,7 @@ def analyze_unseen_for_dataset(dataset_name: str, config: dict, models_config: d
         explanation_rows.append(
             {
                 "dataset": dataset_name.upper(),
+                "seed": int(seed),
                 "time_step": explanation["time_step"],
                 "pattern": explanation["pattern"],
                 "mapped_to": explanation["mapped_to"],
@@ -68,6 +70,7 @@ def analyze_unseen_for_dataset(dataset_name: str, config: dict, models_config: d
         [
             {
                 "dataset": dataset_name.upper(),
+                "seed": int(seed),
                 "total_patterns": int(len(explanations_df)),
                 "unseen_patterns": int(len(unseen_df)),
                 "unseen_ratio": float(len(unseen_df) / len(explanations_df)) if len(explanations_df) else 0.0,
@@ -86,11 +89,16 @@ def main() -> None:
     config = load_config(PROJECT_ROOT / "configs" / "config.yaml")
     models_config = load_config(PROJECT_ROOT / "configs" / "models.yaml")
     explanations_dir, tables_dir = ensure_output_dirs(config)
-
-    skab_explanations, skab_summary = analyze_unseen_for_dataset("skab", config, models_config)
-    batadal_explanations, batadal_summary = analyze_unseen_for_dataset("batadal", config, models_config)
-    explanations_df = pd.concat([skab_explanations, batadal_explanations], ignore_index=True)
-    summary_df = pd.concat([skab_summary, batadal_summary], ignore_index=True)
+    explanation_frames: list[pd.DataFrame] = []
+    summary_frames: list[pd.DataFrame] = []
+    for seed in get_experiment_seeds(config):
+        seed_config = clone_config_with_seed(config, seed)
+        skab_explanations, skab_summary = analyze_unseen_for_dataset("skab", seed_config, models_config, int(seed))
+        batadal_explanations, batadal_summary = analyze_unseen_for_dataset("batadal", seed_config, models_config, int(seed))
+        explanation_frames.extend([skab_explanations, batadal_explanations])
+        summary_frames.extend([skab_summary, batadal_summary])
+    explanations_df = pd.concat(explanation_frames, ignore_index=True)
+    summary_df = pd.concat(summary_frames, ignore_index=True)
 
     explanations_df.to_csv(explanations_dir / "unseen_explanations.csv", index=False)
     summary_df.to_csv(tables_dir / "unseen_metrics.csv", index=False)

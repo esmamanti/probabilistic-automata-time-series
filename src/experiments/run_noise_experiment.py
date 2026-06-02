@@ -15,7 +15,7 @@ from data.data_module import DataModule
 from experiments.run_automata import build_automata_model, compute_metrics, derive_pattern_labels, extract_1d_series
 from experiments.run_deep_models import build_model, build_trainer, resolve_device
 from utils.config import load_config
-from utils.seed import set_seed
+from utils.seed import clone_config_with_seed, get_experiment_seeds, get_primary_seed, set_seed
 
 
 def ensure_output_dirs(config: dict) -> tuple[Path, Path]:
@@ -37,7 +37,7 @@ def run_deep_noise_experiment_for_dataset(
     metrics_rows: list[dict[str, object]] = []
 
     for model_name in ("lstm", "gru"):
-        set_seed(config["project"]["random_seeds"][0])
+        set_seed(get_primary_seed(config))
         model = build_model(model_name, models_config["deep_learning"][model_name])
         trainer = build_trainer(model_name, model, config, models_config)
         trainer.fit(
@@ -110,15 +110,20 @@ def run_automata_noise_experiment_for_dataset(
 def main() -> None:
     config = load_config(PROJECT_ROOT / "configs" / "config.yaml")
     models_config = load_config(PROJECT_ROOT / "configs" / "models.yaml")
-    set_seed(config["project"]["random_seeds"][0])
     explanations_dir, tables_dir = ensure_output_dirs(config)
-
-    results = [
-        run_deep_noise_experiment_for_dataset("skab", config, models_config),
-        run_deep_noise_experiment_for_dataset("batadal", config, models_config),
-        run_automata_noise_experiment_for_dataset("skab", config, models_config),
-        run_automata_noise_experiment_for_dataset("batadal", config, models_config),
-    ]
+    results: list[pd.DataFrame] = []
+    for seed in get_experiment_seeds(config):
+        seed_config = clone_config_with_seed(config, seed)
+        set_seed(int(seed))
+        seed_results = [
+            run_deep_noise_experiment_for_dataset("skab", seed_config, models_config),
+            run_deep_noise_experiment_for_dataset("batadal", seed_config, models_config),
+            run_automata_noise_experiment_for_dataset("skab", seed_config, models_config),
+            run_automata_noise_experiment_for_dataset("batadal", seed_config, models_config),
+        ]
+        for frame in seed_results:
+            frame["seed"] = int(seed)
+            results.append(frame)
     metrics_df = pd.concat(results, ignore_index=True)
     metrics_df.to_csv(tables_dir / "noise_experiment_metrics.csv", index=False)
     with (explanations_dir / "noise_experiment_summary.json").open("w", encoding="utf-8") as handle:

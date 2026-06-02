@@ -11,6 +11,7 @@ from data.preprocessing.noise import add_gaussian_noise
 from data.preprocessing.preprocessing_pipeline import PreprocessingPipeline
 from data.preprocessing.sequence import SequenceDataset, generate_sequences
 from data.split import split_batadal_by_time, split_features_and_target, split_skab_by_group_holdout
+from utils.seed import get_primary_seed
 
 
 @dataclass
@@ -58,7 +59,7 @@ class DataModule:
             group_column=group_column,
             target_column=target_column,
             split_config=dataset_config["split"],
-            random_state=self.config["project"]["random_seeds"][0],
+            random_state=get_primary_seed(self.config),
         )
         return self._finalize_dataset(
             dataset_name="skab",
@@ -123,7 +124,7 @@ class DataModule:
                     transformed_features,
                     mean=self.config["noise"].get("gaussian_mean", 0.0),
                     std=self.config["noise"].get("gaussian_std", 0.05),
-                    random_state=self.config["project"]["random_seeds"][0],
+                    random_state=get_primary_seed(self.config),
                 )
 
             prepared_splits[split_name] = PreparedSplit(

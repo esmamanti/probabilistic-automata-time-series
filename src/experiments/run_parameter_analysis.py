@@ -15,6 +15,7 @@ if str(SRC_ROOT) not in sys.path:
 from data.data_module import DataModule
 from experiments.run_automata import build_automata_model, compute_metrics, derive_pattern_labels, extract_1d_series
 from utils.config import load_config
+from utils.seed import clone_config_with_seed, get_experiment_seeds
 
 
 def ensure_output_dirs(config: dict) -> tuple[Path, Path]:
@@ -39,6 +40,7 @@ def evaluate_parameter_setting(
     models_config: dict,
     window_size: int,
     alphabet_size: int,
+    seed: int,
 ) -> dict[str, object]:
     data_module = DataModule(config)
     prepared_dataset = data_module.prepare_dataset(dataset_name, scenario="original")
@@ -72,6 +74,7 @@ def evaluate_parameter_setting(
 
     return {
         "dataset": dataset_name.upper(),
+        "seed": int(seed),
         "window_size": window_size,
         "alphabet_size": alphabet_size,
         **metrics,
@@ -93,18 +96,21 @@ def main() -> None:
     alphabet_sizes = parameter_config["alphabet_sizes"]
     rows: list[dict[str, object]] = []
 
-    for dataset_name in ("skab", "batadal"):
-        for window_size in window_sizes:
-            for alphabet_size in alphabet_sizes:
-                rows.append(
-                    evaluate_parameter_setting(
-                        dataset_name=dataset_name,
-                        config=config,
-                        models_config=models_config,
-                        window_size=int(window_size),
-                        alphabet_size=int(alphabet_size),
+    for seed in get_experiment_seeds(config):
+        seed_config = clone_config_with_seed(config, seed)
+        for dataset_name in ("skab", "batadal"):
+            for window_size in window_sizes:
+                for alphabet_size in alphabet_sizes:
+                    rows.append(
+                        evaluate_parameter_setting(
+                            dataset_name=dataset_name,
+                            config=seed_config,
+                            models_config=models_config,
+                            window_size=int(window_size),
+                            alphabet_size=int(alphabet_size),
+                            seed=int(seed),
+                        )
                     )
-                )
 
     results_df = pd.DataFrame(rows)
     results_df.to_csv(tables_dir / "parameter_analysis_metrics.csv", index=False)
