@@ -141,6 +141,7 @@ def run_dataset_experiment(dataset_name: str, config: dict, models_config: dict)
     all_metrics: list[dict[str, float]] = []
 
     for model_name in ("lstm", "gru"):
+        set_seed(config["project"]["random_seeds"][0])
         predictions_df, metrics = train_and_evaluate_model(
             dataset_name=dataset_name,
             model_name=model_name,
