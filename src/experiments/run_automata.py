@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import json
+import math
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 
@@ -40,6 +42,22 @@ def build_automata_model(models_config: dict) -> ProbabilisticAutomataModel:
     )
 
 
+def get_decision_config(models_config: dict) -> dict[str, object]:
+    automata_config = models_config["automata"]
+    decision_config = automata_config.get("decision", {})
+    score_field = str(decision_config.get("score_field", "average_log_probability"))
+    if score_field not in {"average_log_probability", "path_probability"}:
+        raise ValueError(
+            "automata.decision.score_field must be 'average_log_probability' or 'path_probability', "
+            f"got '{score_field}'"
+        )
+
+    return {
+        "score_field": score_field,
+        "fallback_quantile": float(decision_config.get("fallback_quantile", 0.05)),
+    }
+
+
 def extract_1d_series(features: pd.DataFrame) -> list[float]:
     if features.shape[1] != 1:
         raise ValueError(
@@ -68,17 +86,74 @@ def derive_pattern_labels(
     return derived_labels
 
 
+def extract_pattern_scores(score_result: dict[str, object], score_field: str) -> list[float]:
+    explanations = score_result["explanations"]
+    return [float(explanation[score_field]) for explanation in explanations]
+
+
+def predict_labels_from_scores(scores: list[float], threshold: float) -> list[int]:
+    return [1 if score <= threshold else 0 for score in scores]
+
+
+def compute_best_threshold(scores: list[float], labels: list[int]) -> float:
+    if len(scores) != len(labels):
+        raise ValueError("scores and labels must have the same length")
+    if not scores:
+        raise ValueError("scores must not be empty")
+
+    ordered_unique_scores = sorted({float(score) for score in scores})
+    candidate_thresholds = [ordered_unique_scores[0] - 1e-12, *ordered_unique_scores]
+
+    best_threshold = candidate_thresholds[0]
+    best_f1 = -1.0
+    best_recall = -1.0
+
+    for threshold in candidate_thresholds:
+        predictions = predict_labels_from_scores(scores, threshold)
+        current_f1 = f1_score(labels, predictions, zero_division=0)
+        current_recall = recall_score(labels, predictions, zero_division=0)
+        if current_f1 > best_f1 or (math.isclose(current_f1, best_f1) and current_recall > best_recall):
+            best_threshold = float(threshold)
+            best_f1 = float(current_f1)
+            best_recall = float(current_recall)
+
+    return best_threshold
+
+
+def fallback_threshold_from_normal_scores(scores: list[float], labels: list[int], quantile: float) -> float:
+    if not 0.0 < quantile < 1.0:
+        raise ValueError(f"fallback quantile must be between 0 and 1, got {quantile}")
+
+    normal_scores = [score for score, label in zip(scores, labels) if int(label) == 0]
+    reference_scores = normal_scores if normal_scores else scores
+    return float(np.quantile(reference_scores, quantile))
+
+
+def calibrate_threshold(
+    scores: list[float],
+    labels: list[int],
+    fallback_quantile: float,
+) -> float:
+    unique_labels = sorted({int(label) for label in labels})
+    if len(unique_labels) >= 2:
+        return compute_best_threshold(scores, labels)
+    return fallback_threshold_from_normal_scores(scores, labels, fallback_quantile)
+
+
 def build_explanation_frame(
     dataset_name: str,
     split_name: str,
     score_result: dict[str, object],
     true_labels: list[int],
+    score_field: str,
+    threshold: float,
 ) -> pd.DataFrame:
     explanations = score_result["explanations"]
     rows: list[dict[str, object]] = []
 
     for explanation, true_label in zip(explanations, true_labels):
-        predicted_label = 1 if explanation["decision"] == "anomaly" else 0
+        decision_score = float(explanation[score_field])
+        predicted_label = 1 if decision_score <= threshold else 0
         rows.append(
             {
                 "dataset": dataset_name,
@@ -93,9 +168,13 @@ def build_explanation_frame(
                 "transition_probability": explanation["transition_probability"],
                 "probability": explanation["probability"],
                 "path_probability": explanation["path_probability"],
+                "average_log_probability": explanation["average_log_probability"],
                 "confidence_score": explanation["confidence_score"],
                 "decision_reason": explanation["decision_reason"],
-                "decision": explanation["decision"],
+                "decision": "anomaly" if predicted_label == 1 else "normal",
+                "decision_score_field": score_field,
+                "decision_score": decision_score,
+                "decision_threshold": float(threshold),
                 "true_label": int(true_label),
                 "predicted_label": predicted_label,
             }
@@ -120,6 +199,8 @@ def run_single_automata_flow(
     split_name: str,
     train_features: pd.DataFrame,
     train_target: pd.Series,
+    calibration_features: pd.DataFrame,
+    calibration_target: pd.Series,
     test_features: pd.DataFrame,
     test_target: pd.Series,
     preprocessing_config: dict,
@@ -130,13 +211,30 @@ def run_single_automata_flow(
     transformed_test = pipeline.transform(test_features)
 
     train_series = extract_1d_series(transformed_train)
+    calibration_series = extract_1d_series(pipeline.transform(calibration_features))
     test_series = extract_1d_series(transformed_test)
 
     model = build_automata_model(models_config)
     model.fit(train_series)
+    decision_config = get_decision_config(models_config)
+    automata_config = models_config["automata"]
+
+    calibration_score_result = model.score_sequence(calibration_series)
+    calibration_labels = derive_pattern_labels(
+        raw_labels=calibration_target,
+        paa_window_size=automata_config["paa"]["window_size"],
+        pattern_window_size=automata_config["sliding_window"]["size"],
+        stride=automata_config["sliding_window"]["stride"],
+        pattern_count=len(calibration_score_result["explanations"]),
+    )
+    threshold = calibrate_threshold(
+        scores=extract_pattern_scores(calibration_score_result, str(decision_config["score_field"])),
+        labels=calibration_labels,
+        fallback_quantile=float(decision_config["fallback_quantile"]),
+    )
+
     score_result = model.score_sequence(test_series)
 
-    automata_config = models_config["automata"]
     true_labels = derive_pattern_labels(
         raw_labels=test_target,
         paa_window_size=automata_config["paa"]["window_size"],
@@ -145,12 +243,21 @@ def run_single_automata_flow(
         pattern_count=len(score_result["explanations"]),
     )
 
-    explanations_df = build_explanation_frame(dataset_name, split_name, score_result, true_labels)
+    explanations_df = build_explanation_frame(
+        dataset_name=dataset_name,
+        split_name=split_name,
+        score_result=score_result,
+        true_labels=true_labels,
+        score_field=str(decision_config["score_field"]),
+        threshold=threshold,
+    )
     metrics = compute_metrics(explanations_df)
     metrics.update(
         {
             "dataset": dataset_name,
             "split": split_name,
+            "decision_score_field": str(decision_config["score_field"]),
+            "decision_threshold": float(threshold),
             "path_probability": float(score_result["path_probability"]),
             "average_log_probability": float(score_result["average_log_probability"]),
             "test_examples": int(len(explanations_df)),
@@ -191,6 +298,8 @@ def run_skab_experiment(config: dict, models_config: dict) -> tuple[pd.DataFrame
             split_name=f"fold_{fold_index}",
             train_features=train_features,
             train_target=train_target,
+            calibration_features=train_features,
+            calibration_target=train_target,
             test_features=test_features,
             test_target=test_target,
             preprocessing_config=preprocessing_config,
@@ -212,6 +321,11 @@ def run_batadal_experiment(config: dict, models_config: dict) -> tuple[pd.DataFr
     splits = split_batadal_by_time(dataset, dataset_config["split"])
 
     train_features, train_target = split_features_and_target(splits["train"], feature_columns, target_column)
+    validation_features, validation_target = split_features_and_target(
+        splits["validation"],
+        feature_columns,
+        target_column,
+    )
     test_features, test_target = split_features_and_target(splits["test"], feature_columns, target_column)
 
     explanations_df, metrics = run_single_automata_flow(
@@ -219,6 +333,8 @@ def run_batadal_experiment(config: dict, models_config: dict) -> tuple[pd.DataFr
         split_name="test",
         train_features=train_features,
         train_target=train_target,
+        calibration_features=validation_features,
+        calibration_target=validation_target,
         test_features=test_features,
         test_target=test_target,
         preprocessing_config=preprocessing_config,

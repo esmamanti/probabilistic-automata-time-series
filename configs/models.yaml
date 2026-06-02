@@ -53,3 +53,7 @@ automata:
   probability:
     smoothing: true
     epsilon: 0.0001
+
+  decision:
+    score_field: "average_log_probability"
+    fallback_quantile: 0.05

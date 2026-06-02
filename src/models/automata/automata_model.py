@@ -119,5 +119,6 @@ class ProbabilisticAutomataModel:
                 states=artifacts.states,
                 transition_probabilities=self.transition_probabilities_,
                 anomaly_threshold=self.anomaly_threshold,
+                epsilon=self.probability_engine.epsilon,
             ),
         }

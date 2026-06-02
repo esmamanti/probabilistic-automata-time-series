@@ -1,4 +1,5 @@
 from models.automata.automata_model import ProbabilisticAutomataModel
+from experiments.run_automata import calibrate_threshold, predict_labels_from_scores
 
 
 def test_automata_model_produces_explanations_for_seen_patterns():
@@ -20,6 +21,7 @@ def test_automata_model_produces_explanations_for_seen_patterns():
     assert all("mapped_to" in explanation for explanation in result["explanations"])
     assert all("decision_reason" in explanation for explanation in result["explanations"])
     assert all("path_probability" in explanation for explanation in result["explanations"])
+    assert all("average_log_probability" in explanation for explanation in result["explanations"])
 
 
 def test_automata_model_marks_unseen_patterns_as_anomaly():
@@ -38,3 +40,22 @@ def test_automata_model_marks_unseen_patterns_as_anomaly():
     assert any(explanation["status"] == "unseen" for explanation in result["explanations"])
     assert any(explanation["decision"] == "anomaly" for explanation in result["explanations"])
     assert any(explanation["decision_reason"] == "unseen_pattern" for explanation in result["explanations"])
+
+
+def test_calibrate_threshold_finds_f1_optimal_split():
+    scores = [-5.0, -4.0, -3.0, -2.0]
+    labels = [1, 1, 0, 0]
+
+    threshold = calibrate_threshold(scores, labels, fallback_quantile=0.05)
+
+    assert threshold == -4.0
+    assert predict_labels_from_scores(scores, threshold) == [1, 1, 0, 0]
+
+
+def test_calibrate_threshold_uses_quantile_when_only_normal_labels_exist():
+    scores = [-5.0, -4.0, -3.0, -2.0]
+    labels = [0, 0, 0, 0]
+
+    threshold = calibrate_threshold(scores, labels, fallback_quantile=0.25)
+
+    assert threshold == -4.25
