@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = PROJECT_ROOT / "src"
@@ -14,6 +15,7 @@ if str(SRC_ROOT) not in sys.path:
 from data.data_module import DataModule, PreparedDataset
 from evaluation.evaluator import Evaluator
 from evaluation.metrics import aggregate_metrics_frame
+from experiments.run_automata import run_batadal_experiment, run_skab_experiment
 from models.deep_learning.gru_model import GRUModel
 from models.deep_learning.lstm_model import LSTMModel
 from models.deep_learning.trainer import Trainer
@@ -85,8 +87,8 @@ def build_prediction_frame(
     predictions,
     seed: int,
 ) -> pd.DataFrame:
-    sequence_data = prepared_dataset.splits[split_name].sequences
-    frame = prepared_dataset.splits[split_name].frame.iloc[sequence_data.sequence_end_indices].reset_index(drop=True)
+    sequence_data = prepared_dataset.splits["test"].sequences
+    frame = prepared_dataset.splits["test"].frame.iloc[sequence_data.sequence_end_indices].reset_index(drop=True)
     return pd.DataFrame(
         {
             "dataset": dataset_name,
@@ -180,6 +182,9 @@ def save_outputs(
     summary_df: pd.DataFrame,
     wilcoxon_df: pd.DataFrame | None,
     mcnemar_df: pd.DataFrame | None,
+    cross_family_summary_df: pd.DataFrame | None = None,
+    cross_family_wilcoxon_df: pd.DataFrame | None = None,
+    cross_family_mcnemar_df: pd.DataFrame | None = None,
 ) -> None:
     metrics_df.to_csv(tables_dir / "deep_learning_metrics.csv", index=False)
     summary_df.to_csv(tables_dir / "deep_learning_metrics_summary.csv", index=False)
@@ -188,6 +193,12 @@ def save_outputs(
     if mcnemar_df is not None:
         mcnemar_df.to_csv(tables_dir / "deep_learning_mcnemar.csv", index=False)
     predictions_df.to_csv(explanations_dir / "deep_learning_predictions.csv", index=False)
+    if cross_family_summary_df is not None:
+        cross_family_summary_df.to_csv(tables_dir / "model_comparison_metrics_summary.csv", index=False)
+    if cross_family_wilcoxon_df is not None:
+        cross_family_wilcoxon_df.to_csv(tables_dir / "model_comparison_wilcoxon.csv", index=False)
+    if cross_family_mcnemar_df is not None:
+        cross_family_mcnemar_df.to_csv(tables_dir / "model_comparison_mcnemar.csv", index=False)
     with (explanations_dir / "deep_learning_summary.json").open("w", encoding="utf-8") as handle:
         json.dump(
             {
@@ -195,6 +206,9 @@ def save_outputs(
                 "summary": summary_df.to_dict(orient="records"),
                 "wilcoxon": [] if wilcoxon_df is None else wilcoxon_df.to_dict(orient="records"),
                 "mcnemar": [] if mcnemar_df is None else mcnemar_df.to_dict(orient="records"),
+                "cross_family_summary": [] if cross_family_summary_df is None else cross_family_summary_df.to_dict(orient="records"),
+                "cross_family_wilcoxon": [] if cross_family_wilcoxon_df is None else cross_family_wilcoxon_df.to_dict(orient="records"),
+                "cross_family_mcnemar": [] if cross_family_mcnemar_df is None else cross_family_mcnemar_df.to_dict(orient="records"),
             },
             handle,
             indent=2,
@@ -226,7 +240,89 @@ def build_statistical_outputs(metrics_df: pd.DataFrame, predictions_df: pd.DataF
     return summary_df, metrics_result.statistical_tests, prediction_result.statistical_tests
 
 
-def print_summary(metrics_df: pd.DataFrame, summary_df: pd.DataFrame, wilcoxon_df: pd.DataFrame | None, mcnemar_df: pd.DataFrame | None) -> None:
+def build_automata_prediction_frame(automata_explanations_df: pd.DataFrame) -> pd.DataFrame:
+    return automata_explanations_df.loc[
+        :,
+        [
+            "dataset",
+            "model",
+            "split",
+            "seed",
+            "row_index",
+            "true_label",
+            "predicted_label",
+        ],
+    ].assign(predicted_probability=np.nan)
+
+
+def build_cross_family_statistical_outputs(
+    deep_metrics_df: pd.DataFrame,
+    deep_predictions_df: pd.DataFrame,
+    config: dict,
+    models_config: dict,
+) -> tuple[pd.DataFrame, pd.DataFrame | None, pd.DataFrame | None]:
+    evaluator = Evaluator()
+    automata_metrics_frames: list[pd.DataFrame] = []
+    automata_prediction_frames: list[pd.DataFrame] = []
+
+    for seed in config["project"]["random_seeds"]:
+        seed_config = clone_config_with_seed(config, int(seed))
+        skab_explanations, skab_metrics = run_skab_experiment(seed_config, models_config)
+        batadal_explanations, batadal_metrics = run_batadal_experiment(seed_config, models_config)
+
+        for explanations_df, metrics_df in (
+            (skab_explanations, skab_metrics),
+            (batadal_explanations, batadal_metrics),
+        ):
+            explanations_copy = explanations_df.copy()
+            metrics_copy = metrics_df.copy()
+            explanations_copy["seed"] = int(seed)
+            metrics_copy["seed"] = int(seed)
+            automata_prediction_frames.append(build_automata_prediction_frame(explanations_copy))
+            automata_metrics_frames.append(metrics_copy)
+
+    automata_metrics_df = pd.concat(
+        [frame for frame in automata_metrics_frames if not frame.empty],
+        ignore_index=True,
+    )
+    automata_predictions_df = pd.concat(
+        [frame for frame in automata_prediction_frames if not frame.empty],
+        ignore_index=True,
+    )
+
+    combined_metrics_df = pd.concat([deep_metrics_df.copy(), automata_metrics_df], ignore_index=True, sort=False)
+    combined_predictions_df = pd.concat([deep_predictions_df.copy(), automata_predictions_df], ignore_index=True, sort=False)
+    summary_df = aggregate_metrics_frame(
+        combined_metrics_df,
+        group_columns=["dataset", "model", "split"],
+        metric_columns=["accuracy", "precision", "recall", "f1_score"],
+    )
+    metrics_result = evaluator.evaluate_metrics_frame(
+        combined_metrics_df,
+        group_columns=["dataset", "split", "seed"],
+        metric_columns=["accuracy", "precision", "recall", "f1_score"],
+        baseline_model=None,
+    )
+    prediction_result = evaluator.evaluate_predictions_frame(
+        combined_predictions_df,
+        group_columns=["dataset", "model", "split", "seed"],
+        model_column="model",
+        comparison_group_columns=["dataset", "split", "seed"],
+        match_columns=["row_index"],
+        baseline_model=None,
+    )
+    return summary_df, metrics_result.statistical_tests, prediction_result.statistical_tests
+
+
+def print_summary(
+    metrics_df: pd.DataFrame,
+    summary_df: pd.DataFrame,
+    wilcoxon_df: pd.DataFrame | None,
+    mcnemar_df: pd.DataFrame | None,
+    cross_family_summary_df: pd.DataFrame | None = None,
+    cross_family_wilcoxon_df: pd.DataFrame | None = None,
+    cross_family_mcnemar_df: pd.DataFrame | None = None,
+) -> None:
     print("=== Deep Learning Runs ===")
     print(metrics_df.to_string(index=False))
     print()
@@ -240,6 +336,18 @@ def print_summary(metrics_df: pd.DataFrame, summary_df: pd.DataFrame, wilcoxon_d
         print()
         print("=== McNemar Tests ===")
         print(mcnemar_df.to_string(index=False))
+    if cross_family_summary_df is not None and not cross_family_summary_df.empty:
+        print()
+        print("=== Cross-Family Mean/Std Summary ===")
+        print(cross_family_summary_df.to_string(index=False))
+    if cross_family_wilcoxon_df is not None and not cross_family_wilcoxon_df.empty:
+        print()
+        print("=== Cross-Family Wilcoxon Tests ===")
+        print(cross_family_wilcoxon_df.to_string(index=False))
+    if cross_family_mcnemar_df is not None and not cross_family_mcnemar_df.empty:
+        print()
+        print("=== Cross-Family McNemar Tests ===")
+        print(cross_family_mcnemar_df.to_string(index=False))
 
 
 def main() -> None:
@@ -254,6 +362,12 @@ def main() -> None:
     metrics_df = pd.concat([skab_metrics, batadal_metrics], ignore_index=True)
     predictions_df = pd.concat([skab_predictions, batadal_predictions], ignore_index=True)
     summary_df, wilcoxon_df, mcnemar_df = build_statistical_outputs(metrics_df, predictions_df)
+    cross_family_summary_df, cross_family_wilcoxon_df, cross_family_mcnemar_df = build_cross_family_statistical_outputs(
+        metrics_df,
+        predictions_df,
+        config,
+        models_config,
+    )
     save_outputs(
         explanations_dir=explanations_dir,
         tables_dir=tables_dir,
@@ -262,8 +376,19 @@ def main() -> None:
         summary_df=summary_df,
         wilcoxon_df=wilcoxon_df,
         mcnemar_df=mcnemar_df,
+        cross_family_summary_df=cross_family_summary_df,
+        cross_family_wilcoxon_df=cross_family_wilcoxon_df,
+        cross_family_mcnemar_df=cross_family_mcnemar_df,
     )
-    print_summary(metrics_df, summary_df, wilcoxon_df, mcnemar_df)
+    print_summary(
+        metrics_df,
+        summary_df,
+        wilcoxon_df,
+        mcnemar_df,
+        cross_family_summary_df,
+        cross_family_wilcoxon_df,
+        cross_family_mcnemar_df,
+    )
 
 
 if __name__ == "__main__":

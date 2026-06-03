@@ -34,6 +34,7 @@ from evaluation.statistical_tests import (
 from experiments.run_automata import build_automata_summary
 from experiments.run_noise_experiment import build_noise_summary
 from experiments.run_parameter_analysis import build_parameter_analysis_summary
+from experiments.run_deep_models import build_automata_prediction_frame, build_cross_family_statistical_outputs
 
 
 def test_compute_metrics_and_confusion_outputs_expected_values():
@@ -83,8 +84,8 @@ def test_aggregate_metrics_frame_computes_group_statistics():
 def test_experiment_summary_builders_compute_mean_and_std_outputs():
     automata_metrics = pd.DataFrame(
         [
-            {"dataset": "SKAB", "split": "fold_0", "decision_score_field": "path_probability", "accuracy": 0.8, "f1_score": 0.7, "unseen_examples": 2},
-            {"dataset": "SKAB", "split": "fold_0", "decision_score_field": "path_probability", "accuracy": 0.6, "f1_score": 0.5, "unseen_examples": 4},
+            {"dataset": "SKAB", "model": "AUTOMATA", "split": "fold_0", "decision_score_field": "path_probability", "accuracy": 0.8, "f1_score": 0.7, "unseen_examples": 2},
+            {"dataset": "SKAB", "model": "AUTOMATA", "split": "fold_0", "decision_score_field": "path_probability", "accuracy": 0.6, "f1_score": 0.5, "unseen_examples": 4},
         ]
     )
     noise_metrics = pd.DataFrame(
@@ -108,6 +109,64 @@ def test_experiment_summary_builders_compute_mean_and_std_outputs():
     assert automata_summary.loc[0, "unseen_examples_mean"] == 3.0
     assert noise_summary.loc[0, "f1_score_mean"] == 0.6
     assert parameter_summary.loc[0, "state_count_mean"] == 12.0
+
+
+def test_cross_family_statistical_outputs_include_automata(monkeypatch):
+    deep_metrics_df = pd.DataFrame(
+        [
+            {"dataset": "SKAB", "model": "LSTM", "split": "fold_0", "seed": 42, "accuracy": 0.8, "precision": 0.8, "recall": 0.8, "f1_score": 0.8},
+            {"dataset": "SKAB", "model": "GRU", "split": "fold_0", "seed": 42, "accuracy": 0.6, "precision": 0.6, "recall": 0.6, "f1_score": 0.6},
+        ]
+    )
+    deep_predictions_df = pd.DataFrame(
+        [
+            {"dataset": "SKAB", "model": "LSTM", "split": "fold_0", "seed": 42, "row_index": 15, "true_label": 0, "predicted_label": 0, "predicted_probability": 0.1},
+            {"dataset": "SKAB", "model": "GRU", "split": "fold_0", "seed": 42, "row_index": 15, "true_label": 0, "predicted_label": 1, "predicted_probability": 0.7},
+        ]
+    )
+    automata_explanations = pd.DataFrame(
+        [
+            {"dataset": "SKAB", "model": "AUTOMATA", "split": "fold_0", "seed": 42, "row_index": 15, "true_label": 0, "predicted_label": 0},
+        ]
+    )
+    automata_metrics = pd.DataFrame(
+        [
+            {"dataset": "SKAB", "model": "AUTOMATA", "split": "fold_0", "seed": 42, "accuracy": 0.9, "precision": 0.9, "recall": 0.9, "f1_score": 0.9},
+        ]
+    )
+
+    monkeypatch.setattr(
+        "experiments.run_deep_models.run_skab_experiment",
+        lambda config, models_config: (automata_explanations.copy(), automata_metrics.copy()),
+    )
+    monkeypatch.setattr(
+        "experiments.run_deep_models.run_batadal_experiment",
+        lambda config, models_config: (pd.DataFrame(columns=automata_explanations.columns), pd.DataFrame(columns=automata_metrics.columns)),
+    )
+
+    summary_df, wilcoxon_df, mcnemar_df = build_cross_family_statistical_outputs(
+        deep_metrics_df=deep_metrics_df,
+        deep_predictions_df=deep_predictions_df,
+        config={"project": {"random_seeds": [42]}},
+        models_config={},
+    )
+
+    assert "AUTOMATA" in summary_df["model"].values
+    assert wilcoxon_df is not None
+    assert mcnemar_df is not None
+    assert {"LSTM", "GRU", "AUTOMATA"}.issubset(set(pd.concat([mcnemar_df["model_a"], mcnemar_df["model_b"]]).unique()))
+
+
+def test_build_automata_prediction_frame_adds_probability_column():
+    automata_df = pd.DataFrame(
+        [
+            {"dataset": "SKAB", "model": "AUTOMATA", "split": "fold_0", "seed": 42, "row_index": 12, "true_label": 0, "predicted_label": 1}
+        ]
+    )
+
+    prediction_df = build_automata_prediction_frame(automata_df)
+
+    assert "predicted_probability" in prediction_df.columns
 
 
 def test_evaluator_builds_metrics_and_statistical_results():

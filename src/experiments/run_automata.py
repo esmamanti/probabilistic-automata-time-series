@@ -88,6 +88,21 @@ def derive_pattern_labels(
     return derived_labels
 
 
+def derive_pattern_end_indices(
+    total_rows: int,
+    paa_window_size: int,
+    pattern_window_size: int,
+    stride: int,
+    pattern_count: int,
+) -> list[int]:
+    end_indices: list[int] = []
+    for pattern_index in range(pattern_count):
+        start = pattern_index * stride * paa_window_size
+        end = min(start + (pattern_window_size * paa_window_size), total_rows)
+        end_indices.append(max(0, end - 1))
+    return end_indices
+
+
 def extract_pattern_scores(score_result: dict[str, object], score_field: str) -> list[float]:
     explanations = score_result["explanations"]
     return [float(explanation[score_field]) for explanation in explanations]
@@ -147,19 +162,21 @@ def build_explanation_frame(
     split_name: str,
     score_result: dict[str, object],
     true_labels: list[int],
+    row_indices: list[int],
     score_field: str,
     threshold: float,
 ) -> pd.DataFrame:
     explanations = score_result["explanations"]
     rows: list[dict[str, object]] = []
 
-    for explanation, true_label in zip(explanations, true_labels):
+    for explanation, true_label, row_index in zip(explanations, true_labels, row_indices):
         decision_score = float(explanation[score_field])
         predicted_label = 1 if decision_score <= threshold else 0
         rows.append(
             {
                 "dataset": dataset_name,
                 "split": split_name,
+                "row_index": int(row_index),
                 "time_step": explanation["time_step"],
                 "pattern": explanation["pattern"],
                 "state": explanation["state"],
@@ -244,19 +261,29 @@ def run_single_automata_flow(
         stride=automata_config["sliding_window"]["stride"],
         pattern_count=len(score_result["explanations"]),
     )
+    row_indices = derive_pattern_end_indices(
+        total_rows=len(test_target),
+        paa_window_size=automata_config["paa"]["window_size"],
+        pattern_window_size=automata_config["sliding_window"]["size"],
+        stride=automata_config["sliding_window"]["stride"],
+        pattern_count=len(score_result["explanations"]),
+    )
 
     explanations_df = build_explanation_frame(
         dataset_name=dataset_name,
         split_name=split_name,
         score_result=score_result,
         true_labels=true_labels,
+        row_indices=row_indices,
         score_field=str(decision_config["score_field"]),
         threshold=threshold,
     )
+    explanations_df["model"] = "AUTOMATA"
     metrics = compute_metrics(explanations_df)
     metrics.update(
         {
             "dataset": dataset_name,
+            "model": "AUTOMATA",
             "split": split_name,
             "decision_score_field": str(decision_config["score_field"]),
             "decision_threshold": float(threshold),
@@ -360,7 +387,7 @@ def build_automata_summary(metrics_df: pd.DataFrame) -> pd.DataFrame:
     available_metric_columns = [column for column in metric_columns if column in metrics_df.columns]
     return aggregate_metrics_frame(
         metrics_df,
-        group_columns=["dataset", "split", "decision_score_field"],
+        group_columns=["dataset", "model", "split", "decision_score_field"],
         metric_columns=available_metric_columns,
     )
 
