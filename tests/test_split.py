@@ -1,6 +1,6 @@
 import pandas as pd
 
-from data.split import split_skab_by_group_holdout
+from data.split import split_skab_by_group_holdout, split_skab_train_validation_groups
 
 
 def test_skab_holdout_split_keeps_source_files_disjoint():
@@ -27,3 +27,28 @@ def test_skab_holdout_split_keeps_source_files_disjoint():
     assert train_groups.isdisjoint(validation_groups)
     assert train_groups.isdisjoint(test_groups)
     assert validation_groups.isdisjoint(test_groups)
+
+
+def test_skab_fold_train_validation_split_keeps_source_files_disjoint():
+    dataset = pd.DataFrame(
+        {
+            "source_file": ["f1", "f1", "f2", "f2", "f3", "f3", "f4", "f4"],
+            "anomaly": [0, 1, 0, 0, 1, 1, 0, 1],
+            "sensor": range(8),
+        }
+    )
+
+    splits = split_skab_train_validation_groups(
+        dataset=dataset,
+        group_column="source_file",
+        target_column="anomaly",
+        validation_ratio=0.25,
+        random_state=42,
+    )
+
+    train_groups = set(splits["train"]["source_file"])
+    validation_groups = set(splits["validation"]["source_file"])
+
+    assert train_groups
+    assert validation_groups
+    assert train_groups.isdisjoint(validation_groups)

@@ -10,7 +10,13 @@ from data.load_skab import get_skab_feature_columns, load_skab_dataset
 from data.preprocessing.noise import add_gaussian_noise
 from data.preprocessing.preprocessing_pipeline import PreprocessingPipeline
 from data.preprocessing.sequence import SequenceDataset, generate_sequences
-from data.split import split_batadal_by_time, split_features_and_target, split_skab_by_group_holdout
+from data.split import (
+    generate_skab_group_folds,
+    split_batadal_by_time,
+    split_features_and_target,
+    split_skab_by_group_holdout,
+    split_skab_train_validation_groups,
+)
 from utils.seed import get_primary_seed
 
 
@@ -28,6 +34,7 @@ class PreparedDataset:
     feature_columns: list[str]
     split_column: str | None
     splits: dict[str, PreparedSplit]
+    evaluation_split: str | None = None
 
 
 class DataModule:
@@ -70,6 +77,38 @@ class DataModule:
             split_column=group_column,
         )
 
+    def prepare_skab_fold_datasets(self, scenario: str = "original") -> list[PreparedDataset]:
+        dataset_config = self.config["datasets"]["skab"]
+        dataset = load_skab_dataset(dataset_config, Path(self.paths["raw_data"]))
+        feature_columns = get_skab_feature_columns(dataset, dataset_config)
+        target_column = dataset_config["target_column"]
+        group_column = dataset_config["group_column"]
+        group_count = dataset[group_column].nunique()
+        fold_count = min(5, group_count)
+
+        prepared_folds: list[PreparedDataset] = []
+        for fold_index, train_idx, test_idx in generate_skab_group_folds(
+            dataset=dataset,
+            group_column=group_column,
+            target_column=target_column,
+            n_splits=fold_count,
+            random_state=get_primary_seed(self.config),
+        ):
+            prepared_folds.append(
+                self._prepare_skab_fold(
+                    dataset=dataset,
+                    feature_columns=feature_columns,
+                    target_column=target_column,
+                    group_column=group_column,
+                    train_idx=train_idx,
+                    test_idx=test_idx,
+                    scenario=scenario,
+                    fold_index=fold_index,
+                )
+            )
+
+        return prepared_folds
+
     def _prepare_batadal(self, scenario: str) -> PreparedDataset:
         dataset_config = self.config["datasets"]["batadal"]
         dataset = load_batadal_dataset(dataset_config, Path(self.paths["raw_data"]))
@@ -85,6 +124,49 @@ class DataModule:
             split_column=None,
         )
 
+    def _prepare_skab_fold(
+        self,
+        dataset: pd.DataFrame,
+        feature_columns: list[str],
+        target_column: str,
+        group_column: str,
+        train_idx,
+        test_idx,
+        scenario: str,
+        fold_index: int,
+    ) -> PreparedDataset:
+        outer_train = dataset.iloc[train_idx].reset_index(drop=True)
+        outer_test = dataset.iloc[test_idx].reset_index(drop=True)
+        split_config = self.config["datasets"]["skab"]["split"]
+        train_ratio = float(split_config["train"])
+        validation_ratio = float(split_config["validation"])
+        train_plus_validation = train_ratio + validation_ratio
+        if train_plus_validation <= 0:
+            raise ValueError("SKAB train and validation ratios must sum to a positive value")
+        relative_validation_ratio = validation_ratio / train_plus_validation
+
+        inner_splits = split_skab_train_validation_groups(
+            dataset=outer_train,
+            group_column=group_column,
+            target_column=target_column,
+            validation_ratio=relative_validation_ratio,
+            random_state=get_primary_seed(self.config) + int(fold_index),
+        )
+        raw_splits = {
+            "train": inner_splits["train"],
+            "validation": inner_splits["validation"],
+            "test": outer_test,
+        }
+        return self._finalize_dataset(
+            dataset_name="skab",
+            feature_columns=feature_columns,
+            target_column=target_column,
+            raw_splits=raw_splits,
+            scenario=scenario,
+            split_column=group_column,
+            evaluation_split=f"fold_{fold_index}",
+        )
+
     def _finalize_dataset(
         self,
         dataset_name: str,
@@ -93,6 +175,7 @@ class DataModule:
         raw_splits: dict[str, pd.DataFrame],
         scenario: str,
         split_column: str | None,
+        evaluation_split: str | None = None,
     ) -> PreparedDataset:
         pipeline = PreprocessingPipeline(self.preprocessing_config)
 
@@ -144,4 +227,5 @@ class DataModule:
             feature_columns=feature_columns,
             split_column=split_column,
             splits=prepared_splits,
+            evaluation_split=evaluation_split,
         )

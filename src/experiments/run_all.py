@@ -26,25 +26,28 @@ def summarize_skab(config: dict) -> None:
     group_column = dataset_config["group_column"]
     group_count = dataset[group_column].nunique()
     fold_count = min(5, group_count)
-    prepared = data_module.prepare_dataset("skab")
+    prepared_folds = data_module.prepare_skab_fold_datasets()
+    first_fold_dataset = prepared_folds[0] if prepared_folds else None
 
     print("=== SKAB ===")
     print(f"shape: {dataset.shape}")
-    print(f"feature_count: {len(prepared.feature_columns)}")
+    print(f"feature_count: {len(first_fold_dataset.feature_columns) if first_fold_dataset is not None else 0}")
     print(f"group_count: {group_count}")
+    print(f"fold_count: {len(prepared_folds)}")
     print(f"label_distribution: {dataset[target_column].value_counts().to_dict()}")
-    print(
-        "holdout_split_sizes: "
-        f"{{'train': {len(prepared.splits['train'].frame)}, "
-        f"'validation': {len(prepared.splits['validation'].frame)}, "
-        f"'test': {len(prepared.splits['test'].frame)}}}"
-    )
-    print(
-        "sequence_shapes: "
-        f"{{'train': {prepared.splits['train'].sequences.features.shape}, "
-        f"'validation': {prepared.splits['validation'].sequences.features.shape}, "
-        f"'test': {prepared.splits['test'].sequences.features.shape}}}"
-    )
+    if first_fold_dataset is not None:
+        print(
+            "first_fold_split_sizes: "
+            f"{{'train': {len(first_fold_dataset.splits['train'].frame)}, "
+            f"'validation': {len(first_fold_dataset.splits['validation'].frame)}, "
+            f"'test': {len(first_fold_dataset.splits['test'].frame)}}}"
+        )
+        print(
+            "first_fold_sequence_shapes: "
+            f"{{'train': {first_fold_dataset.splits['train'].sequences.features.shape}, "
+            f"'validation': {first_fold_dataset.splits['validation'].sequences.features.shape}, "
+            f"'test': {first_fold_dataset.splits['test'].sequences.features.shape}}}"
+        )
 
     if fold_count >= 2:
         first_fold = next(

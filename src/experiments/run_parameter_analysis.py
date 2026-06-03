@@ -36,14 +36,12 @@ def transition_density(transition_counts: dict[int, dict[int, int]], state_count
 
 def evaluate_parameter_setting(
     dataset_name: str,
-    config: dict,
+    prepared_dataset,
     models_config: dict,
     window_size: int,
     alphabet_size: int,
     seed: int,
 ) -> dict[str, object]:
-    data_module = DataModule(config)
-    prepared_dataset = data_module.prepare_dataset(dataset_name, scenario="original")
     modified_models = deepcopy(models_config)
     modified_models["automata"]["paa"]["window_size"] = window_size
     modified_models["automata"]["sliding_window"]["size"] = window_size
@@ -75,6 +73,7 @@ def evaluate_parameter_setting(
     return {
         "dataset": dataset_name.upper(),
         "seed": int(seed),
+        "split": prepared_dataset.evaluation_split or "test",
         "window_size": window_size,
         "alphabet_size": alphabet_size,
         **metrics,
@@ -98,19 +97,26 @@ def main() -> None:
 
     for seed in get_experiment_seeds(config):
         seed_config = clone_config_with_seed(config, seed)
+        data_module = DataModule(seed_config)
         for dataset_name in ("skab", "batadal"):
+            prepared_datasets = (
+                data_module.prepare_skab_fold_datasets(scenario="original")
+                if dataset_name == "skab"
+                else [data_module.prepare_dataset(dataset_name, scenario="original")]
+            )
             for window_size in window_sizes:
                 for alphabet_size in alphabet_sizes:
-                    rows.append(
-                        evaluate_parameter_setting(
-                            dataset_name=dataset_name,
-                            config=seed_config,
-                            models_config=models_config,
-                            window_size=int(window_size),
-                            alphabet_size=int(alphabet_size),
-                            seed=int(seed),
+                    for prepared_dataset in prepared_datasets:
+                        rows.append(
+                            evaluate_parameter_setting(
+                                dataset_name=dataset_name,
+                                prepared_dataset=prepared_dataset,
+                                models_config=models_config,
+                                window_size=int(window_size),
+                                alphabet_size=int(alphabet_size),
+                                seed=int(seed),
+                            )
                         )
-                    )
 
     results_df = pd.DataFrame(rows)
     results_df.to_csv(tables_dir / "parameter_analysis_metrics.csv", index=False)

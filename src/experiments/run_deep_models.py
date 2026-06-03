@@ -133,31 +133,41 @@ def train_and_evaluate_model(
     predictions_df = build_prediction_frame(
         dataset_name=dataset_name.upper(),
         model_name=model_name.upper(),
-        split_name="test",
+        split_name=prepared_dataset.evaluation_split or "test",
         prepared_dataset=prepared_dataset,
         probabilities=test_probabilities,
         predictions=test_predictions,
         seed=seed,
     )
     return predictions_df, metrics
+
+
 def run_dataset_experiment(dataset_name: str, config: dict, models_config: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
     all_predictions: list[pd.DataFrame] = []
     all_metrics: list[dict[str, float]] = []
     for seed in config["project"]["random_seeds"]:
         seed_config = clone_config_with_seed(config, int(seed))
-        prepared_dataset = DataModule(seed_config).prepare_dataset(dataset_name)
-        for model_name in ("lstm", "gru"):
-            set_seed(int(seed))
-            predictions_df, metrics = train_and_evaluate_model(
-                dataset_name=dataset_name,
-                model_name=model_name,
-                prepared_dataset=prepared_dataset,
-                config=seed_config,
-                models_config=models_config,
-                seed=int(seed),
-            )
-            all_predictions.append(predictions_df)
-            all_metrics.append(metrics)
+        data_module = DataModule(seed_config)
+        prepared_datasets = (
+            data_module.prepare_skab_fold_datasets()
+            if dataset_name.lower() == "skab"
+            else [data_module.prepare_dataset(dataset_name)]
+        )
+        for prepared_dataset in prepared_datasets:
+            split_name = prepared_dataset.evaluation_split or "test"
+            for model_name in ("lstm", "gru"):
+                set_seed(int(seed))
+                predictions_df, metrics = train_and_evaluate_model(
+                    dataset_name=dataset_name,
+                    model_name=model_name,
+                    prepared_dataset=prepared_dataset,
+                    config=seed_config,
+                    models_config=models_config,
+                    seed=int(seed),
+                )
+                metrics["split"] = split_name
+                all_predictions.append(predictions_df)
+                all_metrics.append(metrics)
 
     return pd.concat(all_predictions, ignore_index=True), pd.DataFrame(all_metrics)
 

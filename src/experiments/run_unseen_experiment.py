@@ -27,62 +27,73 @@ def ensure_output_dirs(config: dict) -> tuple[Path, Path]:
 
 def analyze_unseen_for_dataset(dataset_name: str, config: dict, models_config: dict, seed: int) -> tuple[pd.DataFrame, pd.DataFrame]:
     data_module = DataModule(config)
-    prepared_dataset = data_module.prepare_dataset(dataset_name, scenario="original")
-    model = build_automata_model(models_config)
-    train_series = extract_1d_series(prepared_dataset.splits["train"].features)
-    test_series = extract_1d_series(prepared_dataset.splits["test"].features)
-    model.fit(train_series)
-    score_result = model.score_sequence(test_series)
-
-    automata_config = models_config["automata"]
-    true_labels = derive_pattern_labels(
-        raw_labels=prepared_dataset.splits["test"].target,
-        paa_window_size=automata_config["paa"]["window_size"],
-        pattern_window_size=automata_config["sliding_window"]["size"],
-        stride=automata_config["sliding_window"]["stride"],
-        pattern_count=len(score_result["explanations"]),
+    prepared_datasets = (
+        data_module.prepare_skab_fold_datasets(scenario="original")
+        if dataset_name.lower() == "skab"
+        else [data_module.prepare_dataset(dataset_name, scenario="original")]
     )
 
-    explanation_rows = []
-    for explanation, true_label in zip(score_result["explanations"], true_labels):
-        explanation_rows.append(
-            {
-                "dataset": dataset_name.upper(),
-                "seed": int(seed),
-                "time_step": explanation["time_step"],
-                "pattern": explanation["pattern"],
-                "mapped_to": explanation["mapped_to"],
-                "status": explanation["status"],
-                "distance": explanation["distance"],
-                "transition_probability": explanation["transition_probability"],
-                "path_probability": explanation["path_probability"],
-                "confidence_score": explanation["confidence_score"],
-                "decision": explanation["decision"],
-                "decision_reason": explanation["decision_reason"],
-                "true_label": int(true_label),
-                "predicted_label": 1 if explanation["decision"] == "anomaly" else 0,
-            }
-        )
-    explanations_df = pd.DataFrame(explanation_rows)
-    unseen_df = explanations_df[explanations_df["status"] == "unseen"].reset_index(drop=True)
+    explanation_frames: list[pd.DataFrame] = []
+    summary_rows: list[dict[str, object]] = []
+    automata_config = models_config["automata"]
 
-    summary = pd.DataFrame(
-        [
+    for prepared_dataset in prepared_datasets:
+        split_name = prepared_dataset.evaluation_split or "test"
+        model = build_automata_model(models_config)
+        train_series = extract_1d_series(prepared_dataset.splits["train"].features)
+        test_series = extract_1d_series(prepared_dataset.splits["test"].features)
+        model.fit(train_series)
+        score_result = model.score_sequence(test_series)
+
+        true_labels = derive_pattern_labels(
+            raw_labels=prepared_dataset.splits["test"].target,
+            paa_window_size=automata_config["paa"]["window_size"],
+            pattern_window_size=automata_config["sliding_window"]["size"],
+            stride=automata_config["sliding_window"]["stride"],
+            pattern_count=len(score_result["explanations"]),
+        )
+
+        explanation_rows = []
+        for explanation, true_label in zip(score_result["explanations"], true_labels):
+            explanation_rows.append(
+                {
+                    "dataset": dataset_name.upper(),
+                    "seed": int(seed),
+                    "split": split_name,
+                    "time_step": explanation["time_step"],
+                    "pattern": explanation["pattern"],
+                    "mapped_to": explanation["mapped_to"],
+                    "status": explanation["status"],
+                    "distance": explanation["distance"],
+                    "transition_probability": explanation["transition_probability"],
+                    "path_probability": explanation["path_probability"],
+                    "confidence_score": explanation["confidence_score"],
+                    "decision": explanation["decision"],
+                    "decision_reason": explanation["decision_reason"],
+                    "true_label": int(true_label),
+                    "predicted_label": 1 if explanation["decision"] == "anomaly" else 0,
+                }
+            )
+        fold_explanations_df = pd.DataFrame(explanation_rows)
+        unseen_df = fold_explanations_df[fold_explanations_df["status"] == "unseen"].reset_index(drop=True)
+        explanation_frames.append(fold_explanations_df)
+        summary_rows.append(
             {
                 "dataset": dataset_name.upper(),
                 "seed": int(seed),
-                "total_patterns": int(len(explanations_df)),
+                "split": split_name,
+                "total_patterns": int(len(fold_explanations_df)),
                 "unseen_patterns": int(len(unseen_df)),
-                "unseen_ratio": float(len(unseen_df) / len(explanations_df)) if len(explanations_df) else 0.0,
+                "unseen_ratio": float(len(unseen_df) / len(fold_explanations_df)) if len(fold_explanations_df) else 0.0,
                 "avg_unseen_distance": float(unseen_df["distance"].mean()) if len(unseen_df) else 0.0,
                 "avg_unseen_confidence": float(unseen_df["confidence_score"].mean()) if len(unseen_df) else 0.0,
                 "unseen_anomaly_rate": float((unseen_df["predicted_label"] == 1).mean()) if len(unseen_df) else 0.0,
                 "unseen_true_anomaly_rate": float((unseen_df["true_label"] == 1).mean()) if len(unseen_df) else 0.0,
                 "mapping_success_rate": 1.0 if len(unseen_df) else 0.0,
             }
-        ]
-    )
-    return explanations_df, summary
+        )
+
+    return pd.concat(explanation_frames, ignore_index=True), pd.DataFrame(summary_rows)
 
 
 def main() -> None:

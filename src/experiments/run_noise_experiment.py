@@ -32,31 +32,43 @@ def run_deep_noise_experiment_for_dataset(
     models_config: dict,
 ) -> pd.DataFrame:
     data_module = DataModule(config)
-    original_dataset = data_module.prepare_dataset(dataset_name, scenario="original")
-    noisy_dataset = data_module.prepare_dataset(dataset_name, scenario="noise")
+    if dataset_name.lower() == "skab":
+        original_datasets = data_module.prepare_skab_fold_datasets(scenario="original")
+        noisy_datasets = data_module.prepare_skab_fold_datasets(scenario="noise")
+        dataset_pairs = list(zip(original_datasets, noisy_datasets))
+    else:
+        dataset_pairs = [
+            (
+                data_module.prepare_dataset(dataset_name, scenario="original"),
+                data_module.prepare_dataset(dataset_name, scenario="noise"),
+            )
+        ]
     metrics_rows: list[dict[str, object]] = []
 
-    for model_name in ("lstm", "gru"):
-        set_seed(get_primary_seed(config))
-        model = build_model(model_name, models_config["deep_learning"][model_name])
-        trainer = build_trainer(model_name, model, config, models_config)
-        trainer.fit(
-            train_data=original_dataset.splits["train"].sequences,
-            validation_data=original_dataset.splits["validation"].sequences,
-        )
-
-        for scenario_name, prepared_dataset in (("original", original_dataset), ("noise", noisy_dataset)):
-            metrics = trainer.evaluate(prepared_dataset.splits["test"].sequences)
-            metrics_rows.append(
-                {
-                    "dataset": dataset_name.upper(),
-                    "model": model_name.upper(),
-                    "scenario": scenario_name,
-                    "family": "DEEP",
-                    **metrics,
-                    "test_examples": int(len(prepared_dataset.splits["test"].sequences.targets)),
-                }
+    for original_dataset, noisy_dataset in dataset_pairs:
+        split_name = original_dataset.evaluation_split or "test"
+        for model_name in ("lstm", "gru"):
+            set_seed(get_primary_seed(config))
+            model = build_model(model_name, models_config["deep_learning"][model_name])
+            trainer = build_trainer(model_name, model, config, models_config)
+            trainer.fit(
+                train_data=original_dataset.splits["train"].sequences,
+                validation_data=original_dataset.splits["validation"].sequences,
             )
+
+            for scenario_name, prepared_dataset in (("original", original_dataset), ("noise", noisy_dataset)):
+                metrics = trainer.evaluate(prepared_dataset.splits["test"].sequences)
+                metrics_rows.append(
+                    {
+                        "dataset": dataset_name.upper(),
+                        "model": model_name.upper(),
+                        "split": split_name,
+                        "scenario": scenario_name,
+                        "family": "DEEP",
+                        **metrics,
+                        "test_examples": int(len(prepared_dataset.splits["test"].sequences.targets)),
+                    }
+                )
 
     return pd.DataFrame(metrics_rows)
 
@@ -67,42 +79,55 @@ def run_automata_noise_experiment_for_dataset(
     models_config: dict,
 ) -> pd.DataFrame:
     data_module = DataModule(config)
-    original_dataset = data_module.prepare_dataset(dataset_name, scenario="original")
-    noisy_dataset = data_module.prepare_dataset(dataset_name, scenario="noise")
-    model = build_automata_model(models_config)
-    train_series = extract_1d_series(original_dataset.splits["train"].features)
-    model.fit(train_series)
-    automata_config = models_config["automata"]
+    if dataset_name.lower() == "skab":
+        original_datasets = data_module.prepare_skab_fold_datasets(scenario="original")
+        noisy_datasets = data_module.prepare_skab_fold_datasets(scenario="noise")
+        dataset_pairs = list(zip(original_datasets, noisy_datasets))
+    else:
+        dataset_pairs = [
+            (
+                data_module.prepare_dataset(dataset_name, scenario="original"),
+                data_module.prepare_dataset(dataset_name, scenario="noise"),
+            )
+        ]
     metrics_rows: list[dict[str, object]] = []
 
-    for scenario_name, prepared_dataset in (("original", original_dataset), ("noise", noisy_dataset)):
-        test_series = extract_1d_series(prepared_dataset.splits["test"].features)
-        score_result = model.score_sequence(test_series)
-        true_labels = derive_pattern_labels(
-            raw_labels=prepared_dataset.splits["test"].target,
-            paa_window_size=automata_config["paa"]["window_size"],
-            pattern_window_size=automata_config["sliding_window"]["size"],
-            stride=automata_config["sliding_window"]["stride"],
-            pattern_count=len(score_result["explanations"]),
-        )
-        explanations_df = pd.DataFrame(
-            {
-                "true_label": true_labels,
-                "predicted_label": [1 if row["decision"] == "anomaly" else 0 for row in score_result["explanations"]],
-            }
-        )
-        metrics = compute_metrics(explanations_df)
-        metrics_rows.append(
-            {
-                "dataset": dataset_name.upper(),
-                "model": "AUTOMATA",
-                "scenario": scenario_name,
-                "family": "AUTOMATA",
-                **metrics,
-                "test_examples": int(len(explanations_df)),
-                "unseen_examples": int(sum(row["status"] == "unseen" for row in score_result["explanations"])),
-            }
-        )
+    for original_dataset, noisy_dataset in dataset_pairs:
+        split_name = original_dataset.evaluation_split or "test"
+        model = build_automata_model(models_config)
+        train_series = extract_1d_series(original_dataset.splits["train"].features)
+        model.fit(train_series)
+        automata_config = models_config["automata"]
+
+        for scenario_name, prepared_dataset in (("original", original_dataset), ("noise", noisy_dataset)):
+            test_series = extract_1d_series(prepared_dataset.splits["test"].features)
+            score_result = model.score_sequence(test_series)
+            true_labels = derive_pattern_labels(
+                raw_labels=prepared_dataset.splits["test"].target,
+                paa_window_size=automata_config["paa"]["window_size"],
+                pattern_window_size=automata_config["sliding_window"]["size"],
+                stride=automata_config["sliding_window"]["stride"],
+                pattern_count=len(score_result["explanations"]),
+            )
+            explanations_df = pd.DataFrame(
+                {
+                    "true_label": true_labels,
+                    "predicted_label": [1 if row["decision"] == "anomaly" else 0 for row in score_result["explanations"]],
+                }
+            )
+            metrics = compute_metrics(explanations_df)
+            metrics_rows.append(
+                {
+                    "dataset": dataset_name.upper(),
+                    "model": "AUTOMATA",
+                    "split": split_name,
+                    "scenario": scenario_name,
+                    "family": "AUTOMATA",
+                    **metrics,
+                    "test_examples": int(len(explanations_df)),
+                    "unseen_examples": int(sum(row["status"] == "unseen" for row in score_result["explanations"])),
+                }
+            )
 
     return pd.DataFrame(metrics_rows)
 

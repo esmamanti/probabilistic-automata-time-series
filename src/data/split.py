@@ -125,3 +125,38 @@ def split_skab_by_group_holdout(
         "validation": dataset[dataset[group_column].isin(validation_groups)].reset_index(drop=True),
         "test": dataset[dataset[group_column].isin(test_groups)].reset_index(drop=True),
     }
+
+
+def split_skab_train_validation_groups(
+    dataset: pd.DataFrame,
+    group_column: str,
+    target_column: str,
+    validation_ratio: float,
+    random_state: int = 42,
+) -> dict[str, pd.DataFrame]:
+    """Split SKAB training folds into disjoint train/validation groups."""
+    required_columns = {group_column, target_column}
+    missing_columns = required_columns.difference(dataset.columns)
+    if missing_columns:
+        raise KeyError(f"Missing required columns: {sorted(missing_columns)}")
+    if not 0.0 < validation_ratio < 1.0:
+        raise ValueError(f"validation_ratio must be between 0 and 1, got {validation_ratio}")
+
+    groups = sorted(dataset[group_column].unique().tolist())
+    if len(groups) < 2:
+        raise ValueError("SKAB training split must contain at least 2 groups for train/validation splitting")
+
+    rng = np.random.default_rng(random_state)
+    shuffled_groups = list(rng.permutation(groups))
+    validation_group_count = max(1, int(round(len(shuffled_groups) * validation_ratio)))
+    validation_group_count = min(validation_group_count, len(shuffled_groups) - 1)
+
+    validation_groups = set(shuffled_groups[:validation_group_count])
+    train_groups = set(shuffled_groups[validation_group_count:])
+    if not train_groups or not validation_groups:
+        raise ValueError("SKAB fold train/validation split produced an empty partition")
+
+    return {
+        "train": dataset[dataset[group_column].isin(train_groups)].reset_index(drop=True),
+        "validation": dataset[dataset[group_column].isin(validation_groups)].reset_index(drop=True),
+    }
