@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from itertools import product
 from pathlib import Path
+from uuid import uuid4
 
 import pandas as pd
 
@@ -100,7 +101,8 @@ def test_explanation_records_are_internally_consistent():
             assert abs(explanation["path_probability"] - expected_path_probability) < 1e-12
 
 
-def test_generate_figures_acceptance_writes_required_pngs(tmp_path, monkeypatch):
+def test_generate_figures_acceptance_writes_required_pngs(monkeypatch):
+    tmp_path = PROJECT_ROOT / f".test-figures-{uuid4().hex}"
     results_dir = tmp_path / "results"
     explanations_dir = results_dir / "explanations"
     tables_dir = results_dir / "tables"
@@ -161,7 +163,8 @@ def test_generate_figures_acceptance_writes_required_pngs(tmp_path, monkeypatch)
     assert all((figures_dir / file_name).stat().st_size > 0 for file_name in expected_files)
 
 
-def test_run_all_acceptance_creates_non_empty_required_outputs(tmp_path, monkeypatch):
+def test_run_all_acceptance_creates_non_empty_required_outputs(monkeypatch):
+    tmp_path = PROJECT_ROOT / f".test-run-all-{uuid4().hex}"
     config = {
         "paths": {
             "tables": "results/tables",

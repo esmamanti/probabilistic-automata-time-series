@@ -1,162 +1,115 @@
 # probabilistic-automata-time-series
 
-This repository compares two families for time-series anomaly detection:
+Bu repo, `yazlab2_v3.pdf` isterlerine uygun olarak zaman serisi anomali tespiti icin iki model ailesini karsilastirir:
 
-- Probabilistic automata with symbolic pattern transitions
-- Deep sequential models: `LSTM`, `GRU`, `CNN`
+- Olasiliksal otomata tabanli sembolik model
+- Derin ogrenme modelleri: `LSTM`, `GRU`, `CNN`
 
-The project is aligned to the Yazilim Gelistirme 2 requirements for:
+## Kapsam
 
-- SKAB and BATADAL datasets
-- leakage-safe preprocessing and splitting
-- noise and unseen experiments
-- automata parameter analysis
-- statistical testing
-- probabilistic explainability
+- Veri kumeleri: `SKAB` ve `BATADAL`
+- Senaryolar: `original`, `noise`, `unseen`
+- Parametre analizi: `window_size = 3..6`, `alphabet_size = 3..6`
+- Istatistiksel analiz: Wilcoxon ve McNemar
+- Olasiliksal aciklanabilirlik: state, pattern, transition probability, path probability, confidence
 
-## Required Dataset Usage
+## Veri Kumesi Kullanimi
 
-| Dataset | Target column | Required usage in this repo |
+| Dataset | Hedef kolon | Bu repodaki kullanim |
 | --- | --- | --- |
-| SKAB | `anomaly` | `valve1` and `valve2` are concatenated; `source_group` and `source_file` are added for traceability |
-| BATADAL | `ATT_FLAG` | `BATADAL_dataset04.csv` is used; labels are remapped from `-999 -> 0` and `1 -> 1` |
+| SKAB | `anomaly` | Sadece `valve1` ve `valve2` birlestirilir; `source_group` ve `source_file` takip icin eklenir |
+| BATADAL | `ATT_FLAG` | Sadece `BATADAL_dataset04.csv` kullanilir; etiketler `-999 -> 0`, `1 -> 1` olarak map edilir |
 
-Important requirement note:
+Notlar:
 
-- The BATADAL label column is explicitly `ATT_FLAG`.
-- SKAB model inputs exclude `datetime`, `changepoint`, `source_group`, and `source_file`.
-- BATADAL keeps time order and uses a strict `60/20/20` train/validation/test split.
+- BATADAL hedef etiketi acik olarak `ATT_FLAG` kolonudur.
+- SKAB model girdisine `datetime`, `changepoint`, `source_group`, `source_file` alinmaz.
+- BATADAL zaman sirasi korunarak `%60 / %20 / %20` train/validation/test ayrimi ile calisir.
 
-## Architecture
+## Mimari
 
-- Central configuration: [configs/config.yaml](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/configs/config.yaml)
-- Deep model registry: [configs/models.yaml](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/configs/models.yaml)
-- Experiment toggles: [configs/experiments.yaml](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/configs/experiments.yaml)
-- Full delivery pipeline: [src/experiments/run_all.py](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/src/experiments/run_all.py)
+- Merkezi config: [configs/config.yaml](configs/config.yaml)
+- Model config: [configs/models.yaml](configs/models.yaml)
+- Deney config: [configs/experiments.yaml](configs/experiments.yaml)
+- Tum pipeline orkestrasyonu: [src/experiments/run_all.py](src/experiments/run_all.py)
 
-Key implementation points:
+Temel noktalar:
 
-- preprocessing is fit only on train data
-- PCA is reduced to one component before automata modeling
-- SKAB uses group-aware fold evaluation
-- BATADAL uses time-ordered evaluation
-- automata unseen patterns are resolved with Levenshtein distance
-- experiment context is stored in CSV/JSON outputs
+- preprocessing sadece train verisi uzerinde fit edilir
+- PCA, automata icin tek boyuta (`PC1`) indirger
+- SKAB grup bazli fold degerlendirmesi kullanir
+- BATADAL zaman sirali degerlendirme kullanir
+- unseen pattern'ler Levenshtein ile en yakin bilinen pattern'e map edilir
+- deney baglami CSV ve JSON artifact'lerine yazilir
 
-## Produced Artifacts
+## Uretilen Artifact'ler
 
-Main outputs are written under:
+Ana ciktilar:
 
-- [results/tables](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables)
-- [results/explanations](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/explanations)
-- [results/figures](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/figures)
+- [results/tables](results/tables)
+- [results/explanations](results/explanations)
+- [results/figures](results/figures)
+- [results/logs](results/logs)
 
-Important alignment notes with the requirements:
+Isterlerle hizali kritik dosyalar:
 
-- `results/tables/deep_learning_metrics.csv` already includes `LSTM`, `GRU`, and `CNN`.
-- `results/explanations/deep_learning_predictions.csv` stores SKAB fold splits as `fold_0` ... `fold_4`.
-- `results/explanations/automata_explanation_example.json` provides a fixed explainability JSON example.
-- runtime outputs are produced as `deep_learning_runtime_metrics.csv`, `deep_learning_runtime_summary.csv`, `automata_runtime_metrics.csv`, and `automata_runtime_summary.csv`.
+- Deep metrics: [results/tables/deep_learning_metrics.csv](results/tables/deep_learning_metrics.csv)
+- Deep summary: [results/tables/deep_learning_metrics_summary.csv](results/tables/deep_learning_metrics_summary.csv)
+- Model comparison: [results/tables/model_comparison_metrics_summary.csv](results/tables/model_comparison_metrics_summary.csv)
+- Noise metrics: [results/tables/noise_experiment_metrics.csv](results/tables/noise_experiment_metrics.csv)
+- Unseen metrics: [results/tables/unseen_metrics.csv](results/tables/unseen_metrics.csv)
+- Parameter analysis: [results/tables/parameter_analysis_metrics.csv](results/tables/parameter_analysis_metrics.csv)
+- Deep predictions: [results/explanations/deep_learning_predictions.csv](results/explanations/deep_learning_predictions.csv)
+- Automata explanations: [results/explanations/automata_skab_explanations.csv](results/explanations/automata_skab_explanations.csv)
+- Explanation JSON example: [results/explanations/automata_explanation_example.json](results/explanations/automata_explanation_example.json)
+- Pipeline progress: [results/logs/pipeline_progress.json](results/logs/pipeline_progress.json)
 
-## Model Comparison
+## Son Durum Ozeti
 
-The current deep-learning aggregate file is:
+- `results/tables/deep_learning_metrics.csv` artik `LSTM`, `GRU` ve `CNN` sonuclarini icerir.
+- `results/explanations/deep_learning_predictions.csv` icinde SKAB split'leri `fold_0` ... `fold_4` olarak kaydedilir.
+- BATADAL split'i `test` olarak tutulur.
+- Aciklanabilirlik ciktilari tablo + JSON ornegi formatinda mevcuttur.
 
-- [results/tables/deep_learning_metrics_summary.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/deep_learning_metrics_summary.csv)
+## Beklenen Gorseller
 
-Representative observations from the current artifacts:
+- [results/figures/confusion_matrix_best_model.png](results/figures/confusion_matrix_best_model.png)
+- [results/figures/roc_curve_best_model.png](results/figures/roc_curve_best_model.png)
+- [results/figures/precision_recall_curve_best_model.png](results/figures/precision_recall_curve_best_model.png)
+- [results/figures/automata_state_diagram_skab.png](results/figures/automata_state_diagram_skab.png)
+- [results/figures/transition_probability_heatmap_skab.png](results/figures/transition_probability_heatmap_skab.png)
+- [results/figures/parameter_sensitivity_skab.png](results/figures/parameter_sensitivity_skab.png)
 
-- On SKAB, deep models outperform automata on F1.
-- On SKAB, `CNN` is currently the strongest deep model on mean F1 in the saved aggregate outputs.
-- On BATADAL, deep models preserve high accuracy but show weak anomaly recall/F1 because of class imbalance.
-- Automata is weaker on raw predictive performance but stronger on interpretability and unseen-pattern traceability.
+## Aciklanabilirlik Semasi
 
-## Noise Effect
+Automata explanation kayitlari su alanlari raporlar:
 
-The noise experiment output is:
+- `state`
+- `previous_state`
+- `pattern`
+- `status`
+- `mapped_to`
+- `distance`
+- `transition_probability`
+- `path_probability`
+- `average_log_probability`
+- `confidence_score`
+- `decision_reason`
+- `decision`
 
-- [results/tables/noise_experiment_metrics.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/noise_experiment_metrics.csv)
+Ornek JSON:
 
-Current qualitative reading:
+- [results/explanations/automata_explanation_example.json](results/explanations/automata_explanation_example.json)
 
-- SKAB deep models are fairly stable under Gaussian noise.
-- Automata changes more visibly under noise, but remains analyzable through transition behavior.
-- BATADAL remains the harder dataset for anomaly recall.
+## Calistirma
 
-## Unseen Behavior
-
-The unseen outputs are:
-
-- [results/tables/unseen_metrics.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/unseen_metrics.csv)
-- [results/explanations/unseen_explanations.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/explanations/unseen_explanations.csv)
-
-Current qualitative reading:
-
-- BATADAL produces a higher unseen-pattern ratio than SKAB.
-- Unseen patterns are mapped to the nearest known pattern with Levenshtein distance.
-- The automata pipeline keeps a trace of status, mapped pattern, distance, transition probability, path probability, and final decision.
-
-## Parameter Effects
-
-The parameter-analysis output is:
-
-- [results/tables/parameter_analysis_metrics.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/parameter_analysis_metrics.csv)
-
-Current qualitative reading:
-
-- increasing `window_size` tends to expand the state space
-- larger symbolic granularity can increase unseen patterns
-- F1, state count, and transition density show a clear interpretability/performance trade-off
-
-## Runtime Outputs
-
-The runtime artifacts are produced during the experiment scripts:
-
-- [results/tables/deep_learning_runtime_metrics.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/deep_learning_runtime_metrics.csv)
-- [results/tables/deep_learning_runtime_summary.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/deep_learning_runtime_summary.csv)
-- [results/tables/automata_runtime_metrics.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/automata_runtime_metrics.csv)
-- [results/tables/automata_runtime_summary.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/automata_runtime_summary.csv)
-
-These files capture per-run and aggregated:
-
-- training time in seconds
-- inference time in seconds
-- evaluated split
-- test example count
-
-## Explainability Schema
-
-The automata explanation pipeline reports:
-
-- current state
-- previous state
-- observed pattern
-- seen/unseen status
-- mapped pattern for unseen cases
-- transition probability
-- path probability
-- confidence score
-- decision reason
-- final decision
-
-Example JSON output:
-
-- [results/explanations/automata_explanation_example.json](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/explanations/automata_explanation_example.json)
-
-Implementation and schema validation:
-
-- [src/models/automata/explainability.py](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/src/models/automata/explainability.py)
-- [tests/test_automata.py](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/tests/test_automata.py)
-
-## Run
-
-Single full pipeline command:
+Tum pipeline:
 
 ```bash
 python src/experiments/run_all.py
 ```
 
-Individual commands:
+Asama bazli komutlar:
 
 ```bash
 python src/main.py
@@ -168,10 +121,20 @@ python src/experiments/run_parameter_analysis.py
 python src/experiments/generate_figures.py
 ```
 
-## Verification
+`run_all.py` asama bazli progress kaydi tutar ve mevcut artifact'ler varsa ilgili asamayi atlayabilir. Bu bilgi [results/logs/pipeline_progress.json](results/logs/pipeline_progress.json) dosyasina yazilir.
 
-Tests can be run from the project root with:
+## Dogrulama
 
 ```bash
 pytest -q
 ```
+
+Acceptance test kapsaminda sunlar dogrulanir:
+
+- Deep artifact'lerde `CNN`, `GRU`, `LSTM` varligi
+- SKAB fold split kayitlari
+- Noise ve unseen senaryolari
+- Parametre grid tamligi
+- Levenshtein unseen mapping davranisi
+- Explanation ic tutarliligi
+- Gorsel ve output artifact uretimi

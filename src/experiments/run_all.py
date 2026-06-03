@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -11,6 +12,41 @@ if str(SRC_ROOT) not in sys.path:
 import main as project_main
 from experiments import generate_figures, run_automata, run_deep_models, run_noise_experiment, run_parameter_analysis, run_unseen_experiment
 from utils.config import load_config
+
+
+STAGE_OUTPUTS = {
+    "bootstrap": ["results/logs/project.log"],
+    "automata": [
+        "results/tables/automata_skab_metrics.csv",
+        "results/tables/automata_batadal_metrics.csv",
+        "results/explanations/automata_summary.json",
+    ],
+    "deep_learning": [
+        "results/tables/deep_learning_metrics.csv",
+        "results/tables/deep_learning_metrics_summary.csv",
+        "results/explanations/deep_learning_predictions.csv",
+    ],
+    "noise": [
+        "results/tables/noise_experiment_metrics.csv",
+        "results/explanations/noise_experiment_summary.json",
+    ],
+    "unseen": [
+        "results/tables/unseen_metrics.csv",
+        "results/explanations/unseen_summary.json",
+    ],
+    "parameter_analysis": [
+        "results/tables/parameter_analysis_metrics.csv",
+        "results/explanations/parameter_analysis_summary.json",
+    ],
+    "figures": [
+        "results/figures/confusion_matrix_best_model.png",
+        "results/figures/roc_curve_best_model.png",
+        "results/figures/precision_recall_curve_best_model.png",
+        "results/figures/automata_state_diagram_skab.png",
+        "results/figures/transition_probability_heatmap_skab.png",
+        "results/figures/parameter_sensitivity_skab.png",
+    ],
+}
 
 
 def _path_to_label(path: Path) -> str:
@@ -38,43 +74,131 @@ def _print_output_summary(collected_outputs: dict[str, list[Path]]) -> None:
             print(f"  - {_path_to_label(path)}")
 
 
+def _ensure_logs_dir(config: dict) -> Path:
+    logs_dir = PROJECT_ROOT / config["paths"]["logs"]
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    return logs_dir
+
+
+def _progress_path(config: dict) -> Path:
+    return _ensure_logs_dir(config) / "pipeline_progress.json"
+
+
+def _stage_paths(stage_name: str) -> list[Path]:
+    return [PROJECT_ROOT / relative_path for relative_path in STAGE_OUTPUTS.get(stage_name, [])]
+
+
+def _stage_is_complete(stage_name: str) -> bool:
+    expected_paths = _stage_paths(stage_name)
+    return bool(expected_paths) and all(path.exists() and path.stat().st_size > 0 for path in expected_paths)
+
+
+def _write_progress(config: dict, stage_name: str, status: str) -> None:
+    progress_file = _progress_path(config)
+    payload: dict[str, object]
+    if progress_file.exists():
+        with progress_file.open("r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+    else:
+        payload = {"stages": {}}
+
+    payload.setdefault("stages", {})
+    payload["stages"][stage_name] = {
+        "status": status,
+        "outputs": [str(path.relative_to(PROJECT_ROOT)) for path in _stage_paths(stage_name)],
+    }
+    with progress_file.open("w", encoding="utf-8") as handle:
+        json.dump(payload, handle, indent=2)
+
+
+def _run_stage(
+    *,
+    config: dict,
+    stage_name: str,
+    label: str,
+    runner,
+    resume_existing: bool,
+) -> None:
+    print()
+    if resume_existing and _stage_is_complete(stage_name):
+        print(f"=== Skipping {label} (existing outputs detected) ===")
+        _write_progress(config, stage_name, "skipped_existing")
+        return
+
+    print(f"=== Running {label} ===")
+    _write_progress(config, stage_name, "running")
+    runner()
+    _write_progress(config, stage_name, "completed")
+
+
 def main() -> None:
     config = load_config(PROJECT_ROOT / "configs" / "config.yaml")
     experiments_config = load_config(PROJECT_ROOT / "configs" / "experiments.yaml")
+    resume_existing = bool(experiments_config.get("output", {}).get("resume_existing", True))
 
     print("=== Full Pipeline Started ===")
-    project_main.main()
+    _run_stage(
+        config=config,
+        stage_name="bootstrap",
+        label="Project Bootstrap",
+        runner=project_main.main,
+        resume_existing=resume_existing,
+    )
 
     enabled_experiments = experiments_config.get("experiments", {})
     plots_config = experiments_config.get("plots", {})
 
     if enabled_experiments.get("original_data", {}).get("enabled", True):
-        print()
-        print("=== Running Automata Baseline Experiments ===")
-        run_automata.main()
-        print()
-        print("=== Running Deep Learning Baseline Experiments ===")
-        run_deep_models.main()
+        _run_stage(
+            config=config,
+            stage_name="automata",
+            label="Automata Baseline Experiments",
+            runner=run_automata.main,
+            resume_existing=resume_existing,
+        )
+        _run_stage(
+            config=config,
+            stage_name="deep_learning",
+            label="Deep Learning Baseline Experiments",
+            runner=run_deep_models.main,
+            resume_existing=resume_existing,
+        )
 
     if enabled_experiments.get("noisy_data", {}).get("enabled", True):
-        print()
-        print("=== Running Noise Experiments ===")
-        run_noise_experiment.main()
+        _run_stage(
+            config=config,
+            stage_name="noise",
+            label="Noise Experiments",
+            runner=run_noise_experiment.main,
+            resume_existing=resume_existing,
+        )
 
     if enabled_experiments.get("unseen_data", {}).get("enabled", True):
-        print()
-        print("=== Running Unseen Experiments ===")
-        run_unseen_experiment.main()
+        _run_stage(
+            config=config,
+            stage_name="unseen",
+            label="Unseen Experiments",
+            runner=run_unseen_experiment.main,
+            resume_existing=resume_existing,
+        )
 
     if enabled_experiments.get("parameter_analysis", {}).get("enabled", True):
-        print()
-        print("=== Running Parameter Analysis ===")
-        run_parameter_analysis.main()
+        _run_stage(
+            config=config,
+            stage_name="parameter_analysis",
+            label="Parameter Analysis",
+            runner=run_parameter_analysis.main,
+            resume_existing=resume_existing,
+        )
 
     if any(bool(enabled) for enabled in plots_config.values()):
-        print()
-        print("=== Generating Figures ===")
-        generate_figures.main()
+        _run_stage(
+            config=config,
+            stage_name="figures",
+            label="Figures",
+            runner=generate_figures.main,
+            resume_existing=resume_existing,
+        )
 
     _print_output_summary(_collect_existing_outputs(config))
 
