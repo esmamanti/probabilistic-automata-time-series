@@ -6,17 +6,130 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
-import seaborn as sns
 from sklearn.metrics import confusion_matrix
 
 from evaluation.metrics import build_curve_frame, validate_aligned_binary_predictions, validate_binary_targets
 
+try:
+    import seaborn as sns
+except ImportError:  # pragma: no cover - exercised indirectly in environments without seaborn
+    sns = None
+
 
 def save_figure(figure: plt.Figure, output_path: str | Path, *, dpi: int = 150) -> Path:
     path = Path(output_path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(path, dpi=dpi, bbox_inches="tight")
-    return path
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        figure.savefig(path, dpi=dpi, bbox_inches="tight")
+        return path
+    except OSError:
+        fallback_dir = Path.cwd() / "results" / "figures" / "_fallback_outputs"
+        fallback_dir.mkdir(parents=True, exist_ok=True)
+        fallback_path = fallback_dir / path.name
+        figure.savefig(fallback_path, dpi=dpi, bbox_inches="tight")
+        return fallback_path
+
+
+def _draw_heatmap(
+    axis: plt.Axes,
+    values: np.ndarray,
+    *,
+    annotations: np.ndarray | None = None,
+    fmt: str = ".2f",
+    cmap: str = "viridis",
+    cbar: bool = True,
+    xticklabels: list[str] | None = None,
+    yticklabels: list[str] | None = None,
+) -> None:
+    if sns is not None:
+        sns.heatmap(
+            values,
+            annot=annotations,
+            fmt=fmt,
+            cmap=cmap,
+            cbar=cbar,
+            xticklabels=xticklabels,
+            yticklabels=yticklabels,
+            ax=axis,
+        )
+        return
+
+    available_colormaps = set(plt.colormaps())
+    resolved_cmap = cmap if cmap in available_colormaps else "viridis"
+    image = axis.imshow(values, cmap=resolved_cmap, aspect="auto")
+    if cbar:
+        axis.figure.colorbar(image, ax=axis)
+
+    if xticklabels is not None:
+        axis.set_xticks(np.arange(len(xticklabels)))
+        axis.set_xticklabels(xticklabels)
+    if yticklabels is not None:
+        axis.set_yticks(np.arange(len(yticklabels)))
+        axis.set_yticklabels(yticklabels)
+
+    if annotations is not None:
+        for row_index in range(values.shape[0]):
+            for column_index in range(values.shape[1]):
+                axis.text(
+                    column_index,
+                    row_index,
+                    format(annotations[row_index, column_index], fmt),
+                    ha="center",
+                    va="center",
+                    color="black",
+                )
+
+
+def _draw_barplot(
+    axis: plt.Axes,
+    metrics_df: pd.DataFrame,
+    *,
+    x: str,
+    y: str,
+    hue: str | None,
+) -> None:
+    if sns is not None:
+        sns.barplot(data=metrics_df, x=x, y=y, hue=hue, ax=axis)
+        return
+
+    if hue is None:
+        categories = metrics_df[x].astype(str).tolist()
+        values = metrics_df[y].astype(float).tolist()
+        axis.bar(categories, values)
+        return
+
+    pivoted = metrics_df.pivot_table(index=x, columns=hue, values=y, aggfunc="mean")
+    categories = pivoted.index.astype(str).tolist()
+    hue_values = pivoted.columns.astype(str).tolist()
+    positions = np.arange(len(categories))
+    width = 0.8 / max(1, len(hue_values))
+    for hue_index, hue_value in enumerate(hue_values):
+        offsets = positions + ((hue_index - (len(hue_values) - 1) / 2.0) * width)
+        axis.bar(offsets, pivoted[hue_value].to_numpy(dtype=float), width=width, label=hue_value)
+    axis.set_xticks(positions)
+    axis.set_xticklabels(categories)
+
+
+def _draw_lineplot(
+    axis: plt.Axes,
+    metrics_df: pd.DataFrame,
+    *,
+    x: str,
+    y: str,
+    hue: str | None,
+) -> None:
+    if sns is not None:
+        sns.lineplot(data=metrics_df, x=x, y=y, hue=hue, marker="o", ax=axis)
+        return
+
+    if hue is None:
+        ordered = metrics_df.sort_values(x, kind="stable")
+        axis.plot(ordered[x], ordered[y], marker="o")
+        return
+
+    for hue_value, group_df in metrics_df.groupby(hue, dropna=False):
+        ordered = group_df.sort_values(x, kind="stable")
+        axis.plot(ordered[x], ordered[y], marker="o", label=str(hue_value))
 
 
 def plot_confusion_matrix(
@@ -38,15 +151,15 @@ def plot_confusion_matrix(
         fmt = ".2f"
 
     figure, axis = plt.subplots(figsize=(5, 4))
-    sns.heatmap(
+    _draw_heatmap(
+        axis,
         heatmap_values,
-        annot=annotation_values,
+        annotations=annotation_values,
         fmt=fmt,
         cmap="Blues",
         cbar=False,
         xticklabels=["Pred 0", "Pred 1"],
         yticklabels=["True 0", "True 1"],
-        ax=axis,
     )
     axis.set_title(title)
     axis.set_xlabel("Predicted label")
@@ -106,7 +219,7 @@ def plot_metric_bars(
         raise KeyError(f"Required columns '{x}' and/or '{y}' are missing from metrics frame")
 
     figure, axis = plt.subplots(figsize=(7, 4))
-    sns.barplot(data=metrics_df, x=x, y=y, hue=hue, ax=axis)
+    _draw_barplot(axis, metrics_df, x=x, y=y, hue=hue)
     axis.set_title(title or f"{y} by {x}")
     axis.set_xlabel(x)
     axis.set_ylabel(y)
@@ -129,7 +242,7 @@ def plot_parameter_sensitivity(
         raise KeyError(f"Required columns '{x}' and/or '{y}' are missing from metrics frame")
 
     figure, axis = plt.subplots(figsize=(7, 4))
-    sns.lineplot(data=metrics_df, x=x, y=y, hue=hue, style=style, marker="o", ax=axis)
+    _draw_lineplot(axis, metrics_df, x=x, y=y, hue=hue)
     axis.set_title(title)
     axis.set_xlabel(x)
     axis.set_ylabel(y)
@@ -161,14 +274,14 @@ def plot_transition_probability_heatmap(
 
     labels = [state_labels.get(state_id, str(state_id)) if state_labels else str(state_id) for state_id in state_ids]
     figure, axis = plt.subplots(figsize=(max(6, len(labels) * 0.5), max(5, len(labels) * 0.45)))
-    sns.heatmap(
+    _draw_heatmap(
+        axis,
         matrix,
         cmap="mako",
-        annot=len(labels) <= 20,
+        annotations=matrix if len(labels) <= 20 else None,
         fmt=".2f",
         xticklabels=labels,
         yticklabels=labels,
-        ax=axis,
     )
     axis.set_title(title)
     axis.set_xlabel("To state")
