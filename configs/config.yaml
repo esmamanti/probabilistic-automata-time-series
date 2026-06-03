@@ -53,6 +53,9 @@ datasets:
       test: 0.2
 
 preprocessing:
+  missing_data:
+    enabled: true
+    strategy: "mean"
 
   scaler: "standard"
 

@@ -16,10 +16,12 @@ from data.data_module import DataModule, PreparedDataset
 from evaluation.evaluator import Evaluator
 from evaluation.metrics import aggregate_metrics_frame
 from experiments.run_automata import run_batadal_experiment, run_skab_experiment
+from models.deep_learning.cnn_model import CNNModel
 from models.deep_learning.gru_model import GRUModel
 from models.deep_learning.lstm_model import LSTMModel
 from models.deep_learning.trainer import Trainer
 from utils.config import load_config
+from utils.experiment_context import attach_context_to_record, build_run_context
 from utils.seed import clone_config_with_seed, get_primary_seed, set_seed
 
 
@@ -44,8 +46,23 @@ def resolve_device(config: dict) -> str:
     return "cpu"
 
 
+def get_enabled_deep_models(models_config: dict) -> list[str]:
+    enabled_models: list[str] = []
+    for model_name, model_config in models_config.get("deep_learning", {}).items():
+        if bool(model_config.get("enabled", True)):
+            enabled_models.append(model_name.lower())
+    if not enabled_models:
+        raise ValueError("No enabled deep learning models found under models_config['deep_learning']")
+    return enabled_models
+
+
+def get_primary_deep_model_name(models_config: dict) -> str:
+    return get_enabled_deep_models(models_config)[0].upper()
+
+
 def build_model(model_name: str, model_config: dict):
-    if model_name == "lstm":
+    architecture = str(model_config.get("architecture", model_name)).lower()
+    if architecture == "lstm":
         return LSTMModel(
             input_size=model_config["input_size"],
             hidden_size=model_config["hidden_size"],
@@ -53,7 +70,7 @@ def build_model(model_name: str, model_config: dict):
             dropout=model_config["dropout"],
             output_size=model_config.get("output_size", 1),
         )
-    if model_name == "gru":
+    if architecture == "gru":
         return GRUModel(
             input_size=model_config["input_size"],
             hidden_size=model_config["hidden_size"],
@@ -61,7 +78,15 @@ def build_model(model_name: str, model_config: dict):
             dropout=model_config["dropout"],
             output_size=model_config.get("output_size", 1),
         )
-    raise ValueError(f"Unsupported deep learning model: {model_name}")
+    if architecture == "cnn":
+        return CNNModel(
+            input_channels=model_config["input_channels"],
+            num_filters=model_config["num_filters"],
+            kernel_size=model_config["kernel_size"],
+            dropout=model_config["dropout"],
+            output_size=model_config.get("output_size", 1),
+        )
+    raise ValueError(f"Unsupported deep learning model architecture: {architecture}")
 
 
 def build_trainer(model_name: str, model, config: dict, models_config: dict) -> Trainer:
@@ -120,6 +145,19 @@ def train_and_evaluate_model(
     test_probabilities = trainer.predict_probabilities(prepared_dataset.splits["test"].sequences)
     test_predictions = trainer.predict_labels(prepared_dataset.splits["test"].sequences)
     metrics = trainer.evaluate(prepared_dataset.splits["test"].sequences)
+    context = build_run_context(
+        config=config,
+        models_config=models_config,
+        dataset_name=dataset_name,
+        split_name=prepared_dataset.evaluation_split or "test",
+        seed=int(seed),
+        family="DEEP",
+        model_name=model_name,
+    )
+    metrics = attach_context_to_record(
+        metrics,
+        context,
+    )
     metrics.update(
         {
             "dataset": dataset_name.upper(),
@@ -147,6 +185,7 @@ def train_and_evaluate_model(
 def run_dataset_experiment(dataset_name: str, config: dict, models_config: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
     all_predictions: list[pd.DataFrame] = []
     all_metrics: list[dict[str, float]] = []
+    model_names = get_enabled_deep_models(models_config)
     for seed in config["project"]["random_seeds"]:
         seed_config = clone_config_with_seed(config, int(seed))
         data_module = DataModule(seed_config)
@@ -157,7 +196,7 @@ def run_dataset_experiment(dataset_name: str, config: dict, models_config: dict)
         )
         for prepared_dataset in prepared_datasets:
             split_name = prepared_dataset.evaluation_split or "test"
-            for model_name in ("lstm", "gru"):
+            for model_name in model_names:
                 set_seed(int(seed))
                 predictions_df, metrics = train_and_evaluate_model(
                     dataset_name=dataset_name,
@@ -215,8 +254,13 @@ def save_outputs(
         )
 
 
-def build_statistical_outputs(metrics_df: pd.DataFrame, predictions_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame | None, pd.DataFrame | None]:
+def build_statistical_outputs(
+    metrics_df: pd.DataFrame,
+    predictions_df: pd.DataFrame,
+    models_config: dict,
+) -> tuple[pd.DataFrame, pd.DataFrame | None, pd.DataFrame | None]:
     evaluator = Evaluator()
+    baseline_model = get_primary_deep_model_name(models_config)
     summary_df = aggregate_metrics_frame(
         metrics_df,
         group_columns=["dataset", "model", "split"],
@@ -226,7 +270,7 @@ def build_statistical_outputs(metrics_df: pd.DataFrame, predictions_df: pd.DataF
         metrics_df,
         group_columns=["dataset", "split", "seed"],
         metric_columns=["accuracy", "precision", "recall", "f1_score"],
-        baseline_model="LSTM",
+        baseline_model=baseline_model,
     )
     prediction_result = evaluator.evaluate_predictions_frame(
         predictions_df,
@@ -235,7 +279,7 @@ def build_statistical_outputs(metrics_df: pd.DataFrame, predictions_df: pd.DataF
         model_column="model",
         comparison_group_columns=["dataset", "split", "seed"],
         match_columns=["row_index"],
-        baseline_model="LSTM",
+        baseline_model=baseline_model,
     )
     return summary_df, metrics_result.statistical_tests, prediction_result.statistical_tests
 
@@ -361,7 +405,7 @@ def main() -> None:
 
     metrics_df = pd.concat([skab_metrics, batadal_metrics], ignore_index=True)
     predictions_df = pd.concat([skab_predictions, batadal_predictions], ignore_index=True)
-    summary_df, wilcoxon_df, mcnemar_df = build_statistical_outputs(metrics_df, predictions_df)
+    summary_df, wilcoxon_df, mcnemar_df = build_statistical_outputs(metrics_df, predictions_df, models_config)
     cross_family_summary_df, cross_family_wilcoxon_df, cross_family_mcnemar_df = build_cross_family_statistical_outputs(
         metrics_df,
         predictions_df,

@@ -1,6 +1,8 @@
 deep_learning:
 
   lstm:
+    architecture: "lstm"
+    enabled: true
     input_size: 1
     hidden_size: 64
     num_layers: 2
@@ -9,6 +11,8 @@ deep_learning:
     learning_rate: 0.001
 
   gru:
+    architecture: "gru"
+    enabled: true
     input_size: 1
     hidden_size: 64
     num_layers: 2
@@ -17,10 +21,13 @@ deep_learning:
     learning_rate: 0.001
 
   cnn:
+    architecture: "cnn"
+    enabled: true
     input_channels: 1
     num_filters: 64
     kernel_size: 3
     dropout: 0.2
+    output_size: 1
     learning_rate: 0.001
 
 training:

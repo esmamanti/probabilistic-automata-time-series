@@ -25,6 +25,7 @@ from experiments.run_automata import (
 )
 from experiments.run_deep_models import build_model, build_trainer
 from utils.config import load_config
+from utils.experiment_context import attach_context_to_record, build_run_context
 from utils.seed import clone_config_with_seed, get_experiment_seeds, set_seed
 
 
@@ -90,6 +91,8 @@ def summarize_unseen_subset(
     split_name: str,
     model_name: str,
     family: str,
+    config: dict | None = None,
+    models_config: dict | None = None,
 ) -> dict[str, object]:
     metrics = compute_subset_metrics(predictions_df)
     summary_row: dict[str, object] = {
@@ -109,7 +112,20 @@ def summarize_unseen_subset(
         unseen_confidences = predictions_df["confidence_score"].dropna()
         summary_row["avg_unseen_confidence"] = float(unseen_confidences.mean()) if not unseen_confidences.empty else math.nan
 
-    return summary_row
+    if config is None or models_config is None:
+        return summary_row
+
+    context = build_run_context(
+        config=config,
+        models_config=models_config,
+        dataset_name=dataset_name,
+        split_name=split_name,
+        seed=int(seed),
+        family=family,
+        model_name=model_name.lower() if model_name != "AUTOMATA" else None,
+        scenario="unseen",
+    )
+    return attach_context_to_record(summary_row, context)
 
 
 def build_automata_unseen_reference(
@@ -156,15 +172,15 @@ def build_automata_unseen_reference(
         split_name=split_name,
         score_result=score_result,
         true_labels=true_labels,
+        row_indices=derive_pattern_end_indices(
+            total_rows=len(prepared_dataset.splits["test"].target),
+            paa_window_size=automata_config["paa"]["window_size"],
+            pattern_window_size=automata_config["sliding_window"]["size"],
+            stride=automata_config["sliding_window"]["stride"],
+            pattern_count=len(score_result["explanations"]),
+        ),
         score_field=str(decision_config["score_field"]),
         threshold=threshold,
-    )
-    explanations_df["row_index"] = derive_pattern_end_indices(
-        total_rows=len(prepared_dataset.splits["test"].target),
-        paa_window_size=automata_config["paa"]["window_size"],
-        pattern_window_size=automata_config["sliding_window"]["size"],
-        stride=automata_config["sliding_window"]["stride"],
-        pattern_count=len(explanations_df),
     )
     explanations_df["seed"] = int(seed)
     explanations_df["model"] = "AUTOMATA"
@@ -185,8 +201,13 @@ def build_deep_unseen_predictions(
     config: dict,
     models_config: dict,
 ) -> list[tuple[str, pd.DataFrame]]:
+    model_names = [
+        model_name
+        for model_name, model_config in models_config.get("deep_learning", {}).items()
+        if bool(model_config.get("enabled", True))
+    ]
     if unseen_reference_df.empty:
-        return [(model_name.upper(), pd.DataFrame()) for model_name in ("lstm", "gru")]
+        return [(model_name.upper(), pd.DataFrame()) for model_name in model_names]
 
     split_name = prepared_dataset.evaluation_split or "test"
     unseen_reference = unseen_reference_df.loc[
@@ -205,7 +226,7 @@ def build_deep_unseen_predictions(
     prediction_frames: list[tuple[str, pd.DataFrame]] = []
     sequence_data = prepared_dataset.splits["test"].sequences
 
-    for model_name in ("lstm", "gru"):
+    for model_name in model_names:
         set_seed(int(seed))
         model = build_model(model_name, models_config["deep_learning"][model_name])
         trainer = build_trainer(model_name, model, config, models_config)
@@ -266,6 +287,8 @@ def analyze_unseen_for_dataset(dataset_name: str, config: dict, models_config: d
                 split_name=split_name,
                 model_name="AUTOMATA",
                 family="AUTOMATA",
+                config=config,
+                models_config=models_config,
             )
         )
 
@@ -287,6 +310,8 @@ def analyze_unseen_for_dataset(dataset_name: str, config: dict, models_config: d
                     split_name=split_name,
                     model_name=model_name,
                     family="DEEP",
+                    config=config,
+                    models_config=models_config,
                 )
             )
 

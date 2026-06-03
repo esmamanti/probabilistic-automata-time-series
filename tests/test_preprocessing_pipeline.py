@@ -30,3 +30,21 @@ def test_sequence_generation_uses_window_max_as_label():
 
     assert sequences.features.shape == (3, 2, 1)
     assert sequences.targets.tolist() == [0, 1, 1]
+
+
+def test_preprocessing_pipeline_imputes_missing_values_before_scaling():
+    pipeline = PreprocessingPipeline(
+        {
+            "missing_data": {"enabled": True, "strategy": "mean"},
+            "scaler": "standard",
+            "pca": {"enabled": False},
+        }
+    )
+    train = pd.DataFrame({"x": [0.0, np.nan, 2.0], "y": [1.0, 1.0, np.nan]})
+    test = pd.DataFrame({"x": [np.nan, 3.0], "y": [2.0, np.nan]})
+
+    transformed_train = pipeline.fit_transform(train)
+    transformed_test = pipeline.transform(test)
+
+    assert not transformed_train.isna().any().any()
+    assert not transformed_test.isna().any().any()

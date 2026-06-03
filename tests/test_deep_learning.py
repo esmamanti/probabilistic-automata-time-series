@@ -2,6 +2,8 @@ import numpy as np
 import torch
 
 from data.preprocessing.sequence import SequenceDataset
+from experiments.run_deep_models import build_model, get_enabled_deep_models
+from models.deep_learning.cnn_model import CNNModel
 from models.deep_learning.gru_model import GRUModel
 from models.deep_learning.lstm_model import LSTMModel
 from models.deep_learning.trainer import Trainer
@@ -38,6 +40,43 @@ def test_gru_forward_returns_batch_logits():
     logits = model(inputs)
 
     assert logits.shape == (5,)
+
+
+def test_cnn_forward_returns_batch_logits():
+    model = CNNModel(input_channels=1, num_filters=4, kernel_size=3, dropout=0.0, output_size=1)
+    inputs = torch.randn(5, 3, 1)
+
+    logits = model(inputs)
+
+    assert logits.shape == (5,)
+
+
+def test_build_model_supports_cnn_architecture_from_config():
+    model = build_model(
+        "cnn",
+        {
+            "architecture": "cnn",
+            "input_channels": 1,
+            "num_filters": 8,
+            "kernel_size": 3,
+            "dropout": 0.1,
+            "output_size": 1,
+        },
+    )
+
+    assert isinstance(model, CNNModel)
+
+
+def test_get_enabled_deep_models_reads_config_without_hardcoding():
+    models_config = {
+        "deep_learning": {
+            "my_lstm": {"architecture": "lstm", "enabled": True},
+            "my_gru": {"architecture": "gru", "enabled": False},
+            "my_cnn": {"architecture": "cnn", "enabled": True},
+        }
+    }
+
+    assert get_enabled_deep_models(models_config) == ["my_lstm", "my_cnn"]
 
 
 def test_trainer_fits_and_evaluates_sequence_classifier():

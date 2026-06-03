@@ -14,8 +14,9 @@ if str(SRC_ROOT) not in sys.path:
 from data.data_module import DataModule
 from evaluation.metrics import aggregate_metrics_frame
 from experiments.run_automata import build_automata_model, compute_metrics, derive_pattern_labels, extract_1d_series
-from experiments.run_deep_models import build_model, build_trainer, resolve_device
+from experiments.run_deep_models import build_model, build_trainer, get_enabled_deep_models
 from utils.config import load_config
+from utils.experiment_context import attach_context_to_record, build_run_context
 from utils.seed import clone_config_with_seed, get_experiment_seeds, get_primary_seed, set_seed
 
 
@@ -45,10 +46,11 @@ def run_deep_noise_experiment_for_dataset(
             )
         ]
     metrics_rows: list[dict[str, object]] = []
+    model_names = get_enabled_deep_models(models_config)
 
     for original_dataset, noisy_dataset in dataset_pairs:
         split_name = original_dataset.evaluation_split or "test"
-        for model_name in ("lstm", "gru"):
+        for model_name in model_names:
             set_seed(get_primary_seed(config))
             model = build_model(model_name, models_config["deep_learning"][model_name])
             trainer = build_trainer(model_name, model, config, models_config)
@@ -59,7 +61,18 @@ def run_deep_noise_experiment_for_dataset(
 
             for scenario_name, prepared_dataset in (("original", original_dataset), ("noise", noisy_dataset)):
                 metrics = trainer.evaluate(prepared_dataset.splits["test"].sequences)
+                context = build_run_context(
+                    config=config,
+                    models_config=models_config,
+                    dataset_name=dataset_name,
+                    split_name=split_name,
+                    seed=int(get_primary_seed(config)),
+                    family="DEEP",
+                    model_name=model_name,
+                    scenario=scenario_name,
+                )
                 metrics_rows.append(
+                    attach_context_to_record(
                     {
                         "dataset": dataset_name.upper(),
                         "model": model_name.upper(),
@@ -68,7 +81,9 @@ def run_deep_noise_experiment_for_dataset(
                         "family": "DEEP",
                         **metrics,
                         "test_examples": int(len(prepared_dataset.splits["test"].sequences.targets)),
-                    }
+                    },
+                    context,
+                )
                 )
 
     return pd.DataFrame(metrics_rows)
@@ -117,7 +132,18 @@ def run_automata_noise_experiment_for_dataset(
                 }
             )
             metrics = compute_metrics(explanations_df)
+            context = build_run_context(
+                config=config,
+                models_config=models_config,
+                dataset_name=dataset_name,
+                split_name=split_name,
+                seed=int(get_primary_seed(config)),
+                family="AUTOMATA",
+                model_name=None,
+                scenario=scenario_name,
+            )
             metrics_rows.append(
+                attach_context_to_record(
                 {
                     "dataset": dataset_name.upper(),
                     "model": "AUTOMATA",
@@ -127,7 +153,9 @@ def run_automata_noise_experiment_for_dataset(
                     **metrics,
                     "test_examples": int(len(explanations_df)),
                     "unseen_examples": int(sum(row["status"] == "unseen" for row in score_result["explanations"])),
-                }
+                },
+                context,
+            )
             )
 
     return pd.DataFrame(metrics_rows)

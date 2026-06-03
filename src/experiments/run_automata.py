@@ -21,6 +21,7 @@ from data.split import generate_skab_group_folds, split_batadal_by_time, split_f
 from evaluation.metrics import aggregate_metrics_frame
 from models.automata.automata_model import ProbabilisticAutomataModel
 from utils.config import load_config
+from utils.experiment_context import attach_context_to_record, build_run_context
 from utils.seed import clone_config_with_seed, get_experiment_seeds, get_primary_seed
 
 
@@ -334,6 +335,17 @@ def run_skab_experiment(config: dict, models_config: dict) -> tuple[pd.DataFrame
             preprocessing_config=preprocessing_config,
             models_config=models_config,
         )
+        metrics = attach_context_to_record(
+            metrics,
+            build_run_context(
+                config=config,
+                models_config=models_config,
+                dataset_name="skab",
+                split_name=f"fold_{fold_index}",
+                seed=int(get_primary_seed(config)),
+                family="AUTOMATA",
+            ),
+        )
         all_explanations.append(explanations_df)
         all_metrics.append(metrics)
 
@@ -368,6 +380,17 @@ def run_batadal_experiment(config: dict, models_config: dict) -> tuple[pd.DataFr
         test_target=test_target,
         preprocessing_config=preprocessing_config,
         models_config=models_config,
+    )
+    metrics = attach_context_to_record(
+        metrics,
+        build_run_context(
+            config=config,
+            models_config=models_config,
+            dataset_name="batadal",
+            split_name="test",
+            seed=int(get_primary_seed(config)),
+            family="AUTOMATA",
+        ),
     )
     return explanations_df, pd.DataFrame([metrics])
 

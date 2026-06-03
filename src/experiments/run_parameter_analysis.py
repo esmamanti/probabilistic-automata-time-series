@@ -16,6 +16,7 @@ from data.data_module import DataModule
 from evaluation.metrics import aggregate_metrics_frame
 from experiments.run_automata import build_automata_model, compute_metrics, derive_pattern_labels, extract_1d_series
 from utils.config import load_config
+from utils.experiment_context import attach_context_to_record, build_run_context
 from utils.seed import clone_config_with_seed, get_experiment_seeds
 
 
@@ -38,6 +39,7 @@ def transition_density(transition_counts: dict[int, dict[int, int]], state_count
 def evaluate_parameter_setting(
     dataset_name: str,
     prepared_dataset,
+    config: dict,
     models_config: dict,
     window_size: int,
     alphabet_size: int,
@@ -71,7 +73,7 @@ def evaluate_parameter_setting(
     state_count = len(model.state_generator.pattern_to_state)
     transition_counts = model.transition_counts_ or {}
 
-    return {
+    return attach_context_to_record({
         "dataset": dataset_name.upper(),
         "seed": int(seed),
         "split": prepared_dataset.evaluation_split or "test",
@@ -82,7 +84,16 @@ def evaluate_parameter_setting(
         "transition_sources": int(len(transition_counts)),
         "transition_density": transition_density(transition_counts, state_count),
         "unseen_examples": int(sum(row["status"] == "unseen" for row in score_result["explanations"])),
-    }
+    }, build_run_context(
+        config=config,
+        models_config=models_config,
+        dataset_name=dataset_name,
+        split_name=prepared_dataset.evaluation_split or "test",
+        seed=int(seed),
+        family="AUTOMATA",
+        scenario="parameter_analysis",
+        extra={"window_size": int(window_size), "alphabet_size": int(alphabet_size)},
+    ))
 
 
 def build_parameter_analysis_summary(results_df: pd.DataFrame) -> pd.DataFrame:
@@ -131,6 +142,7 @@ def main() -> None:
                             evaluate_parameter_setting(
                                 dataset_name=dataset_name,
                                 prepared_dataset=prepared_dataset,
+                                config=seed_config,
                                 models_config=models_config,
                                 window_size=int(window_size),
                                 alphabet_size=int(alphabet_size),
