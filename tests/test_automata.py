@@ -1,3 +1,8 @@
+from models.automata.explainability import (
+    REQUIRED_EXPLANATION_FIELDS,
+    build_explanation_example_payload,
+    validate_explanation_record,
+)
 from models.automata.automata_model import ProbabilisticAutomataModel
 from experiments.run_automata import calibrate_threshold, predict_labels_from_scores
 
@@ -42,6 +47,40 @@ def test_automata_model_marks_unseen_patterns_as_anomaly():
     assert any(explanation["decision"] == "anomaly" for explanation in result["explanations"])
     assert any(explanation["decision_reason"] == "unseen_pattern" for explanation in result["explanations"])
     assert all(explanation["confidence_score"] == explanation["path_probability"] for explanation in result["explanations"])
+
+
+def test_explanation_schema_contains_required_fields_and_json_example():
+    model = ProbabilisticAutomataModel(
+        paa_window_size=1,
+        alphabet_size=3,
+        pattern_window_size=2,
+        anomaly_threshold=0.05,
+        smoothing=True,
+        epsilon=1e-3,
+    )
+
+    model.fit([0.0, 0.2, 0.4, 0.6, 0.8])
+    result = model.score_sequence([0.0, 0.2, 0.4, 0.6, 0.8])
+    explanation = validate_explanation_record(result["explanations"][0])
+    example_payload = build_explanation_example_payload(explanation)
+
+    assert set(REQUIRED_EXPLANATION_FIELDS).issubset(explanation.keys())
+    assert set(
+        [
+            "time_step",
+            "state",
+            "previous_state",
+            "pattern",
+            "status",
+            "mapped_to",
+            "distance",
+            "transition_probability",
+            "path_probability",
+            "confidence_score",
+            "decision_reason",
+            "decision",
+        ]
+    ) == set(example_payload.keys())
 
 
 def test_calibrate_threshold_finds_f1_optimal_split():

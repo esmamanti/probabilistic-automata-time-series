@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import math
 import sys
+from time import perf_counter
 from pathlib import Path
 
 import numpy as np
@@ -20,6 +21,7 @@ from data.preprocessing.preprocessing_pipeline import PreprocessingPipeline
 from data.split import generate_skab_group_folds, split_batadal_by_time, split_features_and_target
 from evaluation.metrics import aggregate_metrics_frame
 from models.automata.automata_model import ProbabilisticAutomataModel
+from models.automata.explainability import build_explanation_example_payload
 from utils.config import load_config
 from utils.experiment_context import attach_context_to_record, build_run_context
 from utils.seed import clone_config_with_seed, get_experiment_seeds, get_primary_seed
@@ -225,7 +227,8 @@ def run_single_automata_flow(
     test_target: pd.Series,
     preprocessing_config: dict,
     models_config: dict,
-) -> tuple[pd.DataFrame, dict[str, float]]:
+) -> tuple[pd.DataFrame, dict[str, float], dict[str, object]]:
+    training_started_at = perf_counter()
     pipeline = PreprocessingPipeline(preprocessing_config)
     transformed_train = pipeline.fit_transform(train_features)
     transformed_test = pipeline.transform(test_features)
@@ -252,8 +255,11 @@ def run_single_automata_flow(
         labels=calibration_labels,
         fallback_quantile=float(decision_config["fallback_quantile"]),
     )
+    training_time_seconds = perf_counter() - training_started_at
 
+    inference_started_at = perf_counter()
     score_result = model.score_sequence(test_series)
+    inference_time_seconds = perf_counter() - inference_started_at
 
     true_labels = derive_pattern_labels(
         raw_labels=test_target,
@@ -295,10 +301,19 @@ def run_single_automata_flow(
             "unseen_examples": int((explanations_df["status"] == "unseen").sum()),
         }
     )
-    return explanations_df, metrics
+    runtime_record = {
+        "dataset": dataset_name,
+        "model": "AUTOMATA",
+        "family": "AUTOMATA",
+        "split": split_name,
+        "training_time_seconds": float(training_time_seconds),
+        "inference_time_seconds": float(inference_time_seconds),
+        "test_examples": int(len(explanations_df)),
+    }
+    return explanations_df, metrics, runtime_record
 
 
-def run_skab_experiment(config: dict, models_config: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
+def run_skab_experiment(config: dict, models_config: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     dataset_config = config["datasets"]["skab"]
     raw_data_path = config["paths"]["raw_data"]
     preprocessing_config = config["preprocessing"]
@@ -310,6 +325,7 @@ def run_skab_experiment(config: dict, models_config: dict) -> tuple[pd.DataFrame
 
     all_explanations: list[pd.DataFrame] = []
     all_metrics: list[dict[str, float]] = []
+    all_runtime_rows: list[dict[str, object]] = []
 
     for fold_index, train_idx, test_idx in generate_skab_group_folds(
         dataset=dataset,
@@ -323,7 +339,7 @@ def run_skab_experiment(config: dict, models_config: dict) -> tuple[pd.DataFrame
         train_features, train_target = split_features_and_target(train_df, feature_columns, target_column)
         test_features, test_target = split_features_and_target(test_df, feature_columns, target_column)
 
-        explanations_df, metrics = run_single_automata_flow(
+        explanations_df, metrics, runtime_record = run_single_automata_flow(
             dataset_name="SKAB",
             split_name=f"fold_{fold_index}",
             train_features=train_features,
@@ -346,13 +362,15 @@ def run_skab_experiment(config: dict, models_config: dict) -> tuple[pd.DataFrame
                 family="AUTOMATA",
             ),
         )
+        runtime_record["seed"] = int(get_primary_seed(config))
         all_explanations.append(explanations_df)
         all_metrics.append(metrics)
+        all_runtime_rows.append(runtime_record)
 
-    return pd.concat(all_explanations, ignore_index=True), pd.DataFrame(all_metrics)
+    return pd.concat(all_explanations, ignore_index=True), pd.DataFrame(all_metrics), pd.DataFrame(all_runtime_rows)
 
 
-def run_batadal_experiment(config: dict, models_config: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
+def run_batadal_experiment(config: dict, models_config: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     dataset_config = config["datasets"]["batadal"]
     raw_data_path = config["paths"]["raw_data"]
     preprocessing_config = config["preprocessing"]
@@ -369,7 +387,7 @@ def run_batadal_experiment(config: dict, models_config: dict) -> tuple[pd.DataFr
     )
     test_features, test_target = split_features_and_target(splits["test"], feature_columns, target_column)
 
-    explanations_df, metrics = run_single_automata_flow(
+    explanations_df, metrics, runtime_record = run_single_automata_flow(
         dataset_name="BATADAL",
         split_name="test",
         train_features=train_features,
@@ -392,7 +410,8 @@ def run_batadal_experiment(config: dict, models_config: dict) -> tuple[pd.DataFr
             family="AUTOMATA",
         ),
     )
-    return explanations_df, pd.DataFrame([metrics])
+    runtime_record["seed"] = int(get_primary_seed(config))
+    return explanations_df, pd.DataFrame([metrics]), pd.DataFrame([runtime_record])
 
 
 def build_automata_summary(metrics_df: pd.DataFrame) -> pd.DataFrame:
@@ -422,6 +441,8 @@ def save_outputs(
     skab_metrics: pd.DataFrame,
     batadal_explanations: pd.DataFrame,
     batadal_metrics: pd.DataFrame,
+    runtime_df: pd.DataFrame,
+    runtime_summary_df: pd.DataFrame,
     summary_df: pd.DataFrame,
 ) -> None:
     skab_explanations.to_csv(explanations_dir / "automata_skab_explanations.csv", index=False)
@@ -429,6 +450,8 @@ def save_outputs(
     skab_metrics.to_csv(tables_dir / "automata_skab_metrics.csv", index=False)
     batadal_metrics.to_csv(tables_dir / "automata_batadal_metrics.csv", index=False)
     summary_df.to_csv(tables_dir / "automata_metrics_summary.csv", index=False)
+    runtime_df.to_csv(tables_dir / "automata_runtime_metrics.csv", index=False)
+    runtime_summary_df.to_csv(tables_dir / "automata_runtime_summary.csv", index=False)
 
     with (explanations_dir / "automata_summary.json").open("w", encoding="utf-8") as handle:
         json.dump(
@@ -436,10 +459,18 @@ def save_outputs(
                 "SKAB": skab_metrics.to_dict(orient="records"),
                 "BATADAL": batadal_metrics.to_dict(orient="records"),
                 "summary": summary_df.to_dict(orient="records"),
+                "runtime": runtime_df.to_dict(orient="records"),
+                "runtime_summary": runtime_summary_df.to_dict(orient="records"),
             },
             handle,
             indent=2,
         )
+
+    example_source = skab_explanations if not skab_explanations.empty else batadal_explanations
+    if not example_source.empty:
+        example_payload = build_explanation_example_payload(example_source.iloc[0].to_dict())
+        with (explanations_dir / "automata_explanation_example.json").open("w", encoding="utf-8") as handle:
+            json.dump(example_payload, handle, indent=2)
 
 
 def print_summary(skeb_metrics: pd.DataFrame, batadal_metrics: pd.DataFrame, summary_df: pd.DataFrame) -> None:
@@ -460,26 +491,38 @@ def main() -> None:
     explanations_dir, tables_dir = ensure_output_dirs(config)
     all_skab_explanations: list[pd.DataFrame] = []
     all_skab_metrics: list[pd.DataFrame] = []
+    all_skab_runtime: list[pd.DataFrame] = []
     all_batadal_explanations: list[pd.DataFrame] = []
     all_batadal_metrics: list[pd.DataFrame] = []
+    all_batadal_runtime: list[pd.DataFrame] = []
 
     for seed in get_experiment_seeds(config):
         seed_config = clone_config_with_seed(config, seed)
-        skab_explanations, skab_metrics = run_skab_experiment(seed_config, models_config)
-        batadal_explanations, batadal_metrics = run_batadal_experiment(seed_config, models_config)
+        skab_explanations, skab_metrics, skab_runtime = run_skab_experiment(seed_config, models_config)
+        batadal_explanations, batadal_metrics, batadal_runtime = run_batadal_experiment(seed_config, models_config)
         skab_explanations["seed"] = int(seed)
         skab_metrics["seed"] = int(seed)
         batadal_explanations["seed"] = int(seed)
         batadal_metrics["seed"] = int(seed)
+        skab_runtime["seed"] = int(seed)
+        batadal_runtime["seed"] = int(seed)
         all_skab_explanations.append(skab_explanations)
         all_skab_metrics.append(skab_metrics)
+        all_skab_runtime.append(skab_runtime)
         all_batadal_explanations.append(batadal_explanations)
         all_batadal_metrics.append(batadal_metrics)
+        all_batadal_runtime.append(batadal_runtime)
 
     skab_explanations = pd.concat(all_skab_explanations, ignore_index=True)
     skab_metrics = pd.concat(all_skab_metrics, ignore_index=True)
     batadal_explanations = pd.concat(all_batadal_explanations, ignore_index=True)
     batadal_metrics = pd.concat(all_batadal_metrics, ignore_index=True)
+    runtime_df = pd.concat([*all_skab_runtime, *all_batadal_runtime], ignore_index=True)
+    runtime_summary_df = aggregate_metrics_frame(
+        runtime_df,
+        group_columns=["dataset", "model", "family", "split"],
+        metric_columns=["training_time_seconds", "inference_time_seconds", "test_examples"],
+    )
     summary_df = build_automata_summary(pd.concat([skab_metrics, batadal_metrics], ignore_index=True))
     save_outputs(
         explanations_dir=explanations_dir,
@@ -488,6 +531,8 @@ def main() -> None:
         skab_metrics=skab_metrics,
         batadal_explanations=batadal_explanations,
         batadal_metrics=batadal_metrics,
+        runtime_df=runtime_df,
+        runtime_summary_df=runtime_summary_df,
         summary_df=summary_df,
     )
     print_summary(skab_metrics, batadal_metrics, summary_df)

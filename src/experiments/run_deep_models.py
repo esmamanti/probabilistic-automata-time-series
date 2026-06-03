@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import json
 import sys
+from time import perf_counter
 from pathlib import Path
 
 import pandas as pd
 import numpy as np
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = PROJECT_ROOT / "src"
@@ -128,6 +130,17 @@ def build_prediction_frame(
     ).join(frame, how="left")
 
 
+def compute_metrics_from_predictions(targets, predictions) -> dict[str, float]:
+    targets_array = np.asarray(targets, dtype=int)
+    predictions_array = np.asarray(predictions, dtype=int)
+    return {
+        "accuracy": float(accuracy_score(targets_array, predictions_array)),
+        "precision": float(precision_score(targets_array, predictions_array, zero_division=0)),
+        "recall": float(recall_score(targets_array, predictions_array, zero_division=0)),
+        "f1_score": float(f1_score(targets_array, predictions_array, zero_division=0)),
+    }
+
+
 def train_and_evaluate_model(
     dataset_name: str,
     model_name: str,
@@ -135,16 +148,23 @@ def train_and_evaluate_model(
     config: dict,
     models_config: dict,
     seed: int,
-) -> tuple[pd.DataFrame, dict[str, float]]:
+) -> tuple[pd.DataFrame, dict[str, float], dict[str, object]]:
     model = build_model(model_name, models_config["deep_learning"][model_name])
     trainer = build_trainer(model_name, model, config, models_config)
+    training_started_at = perf_counter()
     history = trainer.fit(
         train_data=prepared_dataset.splits["train"].sequences,
         validation_data=prepared_dataset.splits["validation"].sequences,
     )
+    training_time_seconds = perf_counter() - training_started_at
+    inference_started_at = perf_counter()
     test_probabilities = trainer.predict_probabilities(prepared_dataset.splits["test"].sequences)
-    test_predictions = trainer.predict_labels(prepared_dataset.splits["test"].sequences)
-    metrics = trainer.evaluate(prepared_dataset.splits["test"].sequences)
+    inference_time_seconds = perf_counter() - inference_started_at
+    test_predictions = (test_probabilities >= 0.5).astype(int)
+    metrics = compute_metrics_from_predictions(
+        prepared_dataset.splits["test"].sequences.targets,
+        test_predictions,
+    )
     context = build_run_context(
         config=config,
         models_config=models_config,
@@ -179,12 +199,24 @@ def train_and_evaluate_model(
         predictions=test_predictions,
         seed=seed,
     )
-    return predictions_df, metrics
+    runtime_record = {
+        "dataset": dataset_name.upper(),
+        "model": model_name.upper(),
+        "family": "DEEP",
+        "split": prepared_dataset.evaluation_split or "test",
+        "seed": int(seed),
+        "training_time_seconds": float(training_time_seconds),
+        "inference_time_seconds": float(inference_time_seconds),
+        "test_examples": int(len(prepared_dataset.splits["test"].sequences.targets)),
+        "epochs_completed": int(history.epochs_completed),
+    }
+    return predictions_df, metrics, runtime_record
 
 
-def run_dataset_experiment(dataset_name: str, config: dict, models_config: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
+def run_dataset_experiment(dataset_name: str, config: dict, models_config: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     all_predictions: list[pd.DataFrame] = []
     all_metrics: list[dict[str, float]] = []
+    all_runtime_rows: list[dict[str, object]] = []
     model_names = get_enabled_deep_models(models_config)
     for seed in config["project"]["random_seeds"]:
         seed_config = clone_config_with_seed(config, int(seed))
@@ -198,7 +230,7 @@ def run_dataset_experiment(dataset_name: str, config: dict, models_config: dict)
             split_name = prepared_dataset.evaluation_split or "test"
             for model_name in model_names:
                 set_seed(int(seed))
-                predictions_df, metrics = train_and_evaluate_model(
+                predictions_df, metrics, runtime_record = train_and_evaluate_model(
                     dataset_name=dataset_name,
                     model_name=model_name,
                     prepared_dataset=prepared_dataset,
@@ -209,8 +241,9 @@ def run_dataset_experiment(dataset_name: str, config: dict, models_config: dict)
                 metrics["split"] = split_name
                 all_predictions.append(predictions_df)
                 all_metrics.append(metrics)
+                all_runtime_rows.append(runtime_record)
 
-    return pd.concat(all_predictions, ignore_index=True), pd.DataFrame(all_metrics)
+    return pd.concat(all_predictions, ignore_index=True), pd.DataFrame(all_metrics), pd.DataFrame(all_runtime_rows)
 
 
 def save_outputs(
@@ -218,6 +251,8 @@ def save_outputs(
     tables_dir: Path,
     metrics_df: pd.DataFrame,
     predictions_df: pd.DataFrame,
+    runtime_df: pd.DataFrame,
+    runtime_summary_df: pd.DataFrame,
     summary_df: pd.DataFrame,
     wilcoxon_df: pd.DataFrame | None,
     mcnemar_df: pd.DataFrame | None,
@@ -227,6 +262,8 @@ def save_outputs(
 ) -> None:
     metrics_df.to_csv(tables_dir / "deep_learning_metrics.csv", index=False)
     summary_df.to_csv(tables_dir / "deep_learning_metrics_summary.csv", index=False)
+    runtime_df.to_csv(tables_dir / "deep_learning_runtime_metrics.csv", index=False)
+    runtime_summary_df.to_csv(tables_dir / "deep_learning_runtime_summary.csv", index=False)
     if wilcoxon_df is not None:
         wilcoxon_df.to_csv(tables_dir / "deep_learning_wilcoxon.csv", index=False)
     if mcnemar_df is not None:
@@ -243,6 +280,8 @@ def save_outputs(
             {
                 "runs": metrics_df.to_dict(orient="records"),
                 "summary": summary_df.to_dict(orient="records"),
+                "runtime": runtime_df.to_dict(orient="records"),
+                "runtime_summary": runtime_summary_df.to_dict(orient="records"),
                 "wilcoxon": [] if wilcoxon_df is None else wilcoxon_df.to_dict(orient="records"),
                 "mcnemar": [] if mcnemar_df is None else mcnemar_df.to_dict(orient="records"),
                 "cross_family_summary": [] if cross_family_summary_df is None else cross_family_summary_df.to_dict(orient="records"),
@@ -311,8 +350,8 @@ def build_cross_family_statistical_outputs(
 
     for seed in config["project"]["random_seeds"]:
         seed_config = clone_config_with_seed(config, int(seed))
-        skab_explanations, skab_metrics = run_skab_experiment(seed_config, models_config)
-        batadal_explanations, batadal_metrics = run_batadal_experiment(seed_config, models_config)
+        skab_explanations, skab_metrics, _ = run_skab_experiment(seed_config, models_config)
+        batadal_explanations, batadal_metrics, _ = run_batadal_experiment(seed_config, models_config)
 
         for explanations_df, metrics_df in (
             (skab_explanations, skab_metrics),
@@ -366,7 +405,7 @@ def print_summary(
     cross_family_summary_df: pd.DataFrame | None = None,
     cross_family_wilcoxon_df: pd.DataFrame | None = None,
     cross_family_mcnemar_df: pd.DataFrame | None = None,
-) -> None:
+        ) -> None:
     print("=== Deep Learning Runs ===")
     print(metrics_df.to_string(index=False))
     print()
@@ -400,11 +439,17 @@ def main() -> None:
     set_seed(get_primary_seed(config))
     explanations_dir, tables_dir = ensure_output_dirs(config)
 
-    skab_predictions, skab_metrics = run_dataset_experiment("skab", config, models_config)
-    batadal_predictions, batadal_metrics = run_dataset_experiment("batadal", config, models_config)
+    skab_predictions, skab_metrics, skab_runtime = run_dataset_experiment("skab", config, models_config)
+    batadal_predictions, batadal_metrics, batadal_runtime = run_dataset_experiment("batadal", config, models_config)
 
     metrics_df = pd.concat([skab_metrics, batadal_metrics], ignore_index=True)
     predictions_df = pd.concat([skab_predictions, batadal_predictions], ignore_index=True)
+    runtime_df = pd.concat([skab_runtime, batadal_runtime], ignore_index=True)
+    runtime_summary_df = aggregate_metrics_frame(
+        runtime_df,
+        group_columns=["dataset", "model", "family", "split"],
+        metric_columns=["training_time_seconds", "inference_time_seconds", "test_examples", "epochs_completed"],
+    )
     summary_df, wilcoxon_df, mcnemar_df = build_statistical_outputs(metrics_df, predictions_df, models_config)
     cross_family_summary_df, cross_family_wilcoxon_df, cross_family_mcnemar_df = build_cross_family_statistical_outputs(
         metrics_df,
@@ -417,6 +462,8 @@ def main() -> None:
         tables_dir=tables_dir,
         metrics_df=metrics_df,
         predictions_df=predictions_df,
+        runtime_df=runtime_df,
+        runtime_summary_df=runtime_summary_df,
         summary_df=summary_df,
         wilcoxon_df=wilcoxon_df,
         mcnemar_df=mcnemar_df,

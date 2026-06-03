@@ -1,154 +1,214 @@
 # Final Report
 
-## 1. Problem ve Yaklasim
+## 1. Problem and Goal
 
-Bu proje, zaman serisi anomali tespitinde iki farkli aileyi karsilastirir:
+This project compares two modeling families for time-series anomaly detection:
 
-- Olasiliksal otomata tabanli sembolik modelleme
-- Derin ogrenme tabanli sira modelleri (`LSTM`, `GRU`, `CNN`)
+- probabilistic automata built on symbolic patterns and transition probabilities
+- deep sequential models: `LSTM`, `GRU`, and `CNN`
 
-Bu revizyonda mimari "tam parametrik" olacak sekilde guncellendi. `configs/models.yaml` altindaki etkin derin modeller deney kodu tarafinda otomatik kesfediliyor. Boylece yeni bir model eklemek veya bir modeli pasife almak icin artik deney dongusunde elle degisiklik yapmaya gerek kalmiyor.
+The goal is not only to compare raw predictive performance, but also to analyze:
 
-## 2. Veri Setleri
+- dataset-dependent behavior
+- robustness under Gaussian noise
+- behavior on unseen symbolic patterns
+- automata parameter sensitivity
+- explainability through probabilistic transitions
+
+## 2. Dataset Usage
 
 ### SKAB
 
-- Hedef sutunu: `anomaly`
-- Split stratejisi: grup bazli hold-out / fold bazli ayirim
-- Ozellikler: sensorden gelen zaman serisi kolonlari
+- The project uses only `valve1` and `valve2`.
+- All CSV files are concatenated into one dataset.
+- `source_group` and `source_file` are added for traceability and group-aware splitting.
+- Target column: `anomaly`
+- Model inputs exclude `datetime`, `changepoint`, `source_group`, and `source_file`.
 
 ### BATADAL
 
-- Hedef sutunu: `ATT_FLAG`
-- Etiket donusumu: `-999 -> 0`, `1 -> 1`
-- Split stratejisi: zaman sirali train/validation/test
+- The project uses `BATADAL_dataset04.csv`.
+- The target label column is explicitly `ATT_FLAG`.
+- Labels are remapped as `-999 -> 0` and `1 -> 1`.
+- Time order is preserved.
+- The split is fixed as `60% train / 20% validation / 20% test`.
 
-Bu noktada `ATT_FLAG` bilgisinin raporda acikca yazilmasi zorunlu oldugu icin burada dogrudan belirtilmistir.
+This directly satisfies the requirement that the BATADAL label name must be checked and clearly stated in the report.
 
-## 3. Eksik Veri Denetimi ve Preprocessing
+## 3. Preprocessing and Leakage Control
 
-Ham veri audit'i sonucunda:
+The preprocessing pipeline contains:
 
-- `BATADAL_dataset04.csv` dosyasinda eksik deger sayisi: `0`
-- Dahil edilen SKAB CSV dosyalarinda eksik deger sayisi: `0`
-
-Dolayisiyla mevcut veri snapshot'inda imputasyon ihtiyaci fiilen yoktur. Buna ragmen, proje isterindeki "gerekli durumlarda eksik veri islemleri" maddesini karsilamak icin preprocessing pipeline'a su eklenmistir:
-
-- `preprocessing.missing_data.enabled`
-- `preprocessing.missing_data.strategy`
-- `SimpleImputer` tabanli eksik veri tamamlama
-
-Pipeline sirasi:
-
-1. Eksik veri imputasyonu
+1. Missing-value handling with `SimpleImputer`
 2. Scaling
-3. PCA
+3. PCA reduction to one component
 4. Sequence generation
 
-## 4. Deney Baglami ve Loglama
+Even though the current BATADAL and SKAB snapshots do not contain missing values, the pipeline still supports missing-data handling as required.
 
-Onceki durumda metric ciktilari deney baglamini sistematik olarak tasimiyordu. Bu revizyonla birlikte her run satiri su alanlari da icerir:
+Leakage prevention rules are respected:
 
-- `experiment_context`
-- `context_preprocessing_*`
-- `context_noise_*`
-- `context_training_*`
-- `context_automata_*`
-- `context_model_config_*`
+- normalization is fit only on train data
+- PCA is fit only on train data
+- the same fitted transforms are reused on validation and test
+- automata state generation and transition probabilities are built only from train data
 
-Ayrica `src/main.py` artik:
+## 4. Deep Learning Outputs and Artifact Alignment
 
-- tum resolve edilmis config snapshot'larini
-- veri seti bazli eksik veri audit sonucunu
+The saved artifacts already show that the deep-learning pipeline includes all three enabled models:
 
-`results/logs/project.log` dosyasina yazar.
+- `LSTM`
+- `GRU`
+- `CNN`
 
-## 5. Guncel Model Karsilastirmasi
+This can be verified in:
 
-Asagidaki ozet, `results/tables/deep_learning_metrics.csv` dosyasinin 5 seed ortalamalarindan alinmistir.
+- [results/tables/deep_learning_metrics.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/deep_learning_metrics.csv)
+- [results/tables/deep_learning_metrics_summary.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/deep_learning_metrics_summary.csv)
 
-| Dataset | Model | Accuracy | Precision | Recall | F1 |
-| --- | --- | ---: | ---: | ---: | ---: |
-| SKAB | CNN | 0.6643 | 0.5683 | 0.2037 | 0.2845 |
-| SKAB | GRU | 0.6633 | 0.5877 | 0.1968 | 0.2750 |
-| SKAB | LSTM | 0.6618 | 0.5588 | 0.1830 | 0.2570 |
-| BATADAL | CNN | 0.8660 | 0.0000 | 0.0000 | 0.0000 |
-| BATADAL | GRU | 0.8655 | 0.4214 | 0.0211 | 0.0404 |
-| BATADAL | LSTM | 0.8609 | 0.0087 | 0.0023 | 0.0030 |
+The SKAB prediction artifact is also fold-aware:
 
-Otomata ciktilari icin mevcut artefakt ozeti:
+- [results/explanations/deep_learning_predictions.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/explanations/deep_learning_predictions.csv)
 
-| Dataset | Accuracy | Precision | Recall | F1 | Ortalama unseen |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| SKAB | 0.6132 | 0.2935 | 0.0611 | 0.0932 | 20.6 |
-| BATADAL | 0.7282 | 0.2200 | 0.3929 | 0.2821 | 9.0 |
+That file stores `split` values such as `fold_0`, `fold_1`, `fold_2`, `fold_3`, and `fold_4`, so the fold-based reporting requirement is satisfied by the current saved outputs.
 
-Degerlendirme:
+## 5. Model Comparison
 
-- SKAB veri setinde derin modeller daha yuksek F1 uretiyor.
-- BATADAL veri setinde accuracy yuksek kalirken anomaly yakalama performansi derin tarafta zayif.
-- CNN entegrasyonu mimariyi parametre odakli hale getirdi ve SKAB tarafinda en iyi ortalama F1'i verdi.
+The deep-learning aggregate outputs show:
 
-## 6. Noise Analizi
+- On SKAB, deep models outperform automata on F1.
+- On SKAB, `CNN` currently gives the strongest saved mean F1 among the deep models.
+- On BATADAL, deep models keep high accuracy but weak anomaly recall and F1 because anomaly detection is harder under strong class imbalance.
 
-`results/tables/noise_experiment_metrics.csv` icindeki kayitli snapshot su davranisi gosteriyor:
+The automata outputs show a different trade-off:
 
-| Dataset | Model | Original F1 | Noise F1 | Gozlem |
-| --- | --- | ---: | ---: | --- |
-| SKAB | LSTM | 0.3883 | 0.3864 | Cok kucuk dusus |
-| SKAB | GRU | 0.3526 | 0.3535 | Neredeyse sabit |
-| SKAB | AUTOMATA | 0.0355 | 0.0393 | Kucuk artis |
-| BATADAL | AUTOMATA | 0.2821 | 0.2933 | Kucuk artis |
+- lower predictive performance than the best deep models
+- stronger interpretability
+- explicit unseen-pattern handling
+- direct probabilistic explanations through transition structure
 
-Yorum:
+So the comparison is not only "which model is best", but "which family behaves better under which requirement".
 
-- SKAB tarafinda derin modeller dusuk seviyeli gaussian noise'a goreli dayanikli.
-- BATADAL automata modeli noise altinda hafif iyilesme gostermis.
-- Bu artefakt, guncel CNN entegrasyonundan once uretilmis snapshot'i temsil eder; ayni deney akisi yeni parametrik yapiyla tekrar calistirilabilir.
+## 6. Cross-Dataset Observations
 
-## 7. Unseen Pattern Analizi
+Even without introducing additional datasets beyond SKAB and BATADAL, the project still provides an inter-dataset comparison:
 
-`results/tables/unseen_metrics.csv` ozetine gore:
+- SKAB favors deep models much more clearly
+- BATADAL is more difficult for deep anomaly recall
+- BATADAL produces a larger unseen-pattern ratio than SKAB
+- BATADAL shows a stronger interaction between symbolic complexity and class imbalance
 
-| Dataset | Total Patterns | Unseen Patterns | Unseen Ratio | Avg Distance | Avg Confidence |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| SKAB | 1374 | 5 | 0.003639 | 1.0 | 0.75 |
-| BATADAL | 206 | 9 | 0.043689 | 1.0 | 0.75 |
+This satisfies the requirement to discuss dataset-dependent performance differences.
 
-Sonuclar:
+## 7. Noise Effect Analysis
 
-- BATADAL daha yuksek unseen ratio uretiyor.
-- Her iki veri setinde de unseen pattern'lerin en yakin eslesmesi bulunabiliyor.
-- BATADAL'da unseen paternlerin anomaly ile iliskisi daha yuksek gorunuyor.
+The saved noise experiment output is:
 
-## 8. Parametre Duyarliligi
+- [results/tables/noise_experiment_metrics.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/noise_experiment_metrics.csv)
 
-`results/tables/parameter_analysis_metrics.csv` icinden en iyi F1 kombinasyonlari:
+Key observations from the current saved snapshot:
 
-| Dataset | Window Size | Alphabet Size | F1 | Accuracy | Unseen |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| SKAB | 6 | 5 | 0.1741 | 0.5947 | 22 |
-| BATADAL | 6 | 3 | 0.3889 | 0.5111 | 66 |
+- On SKAB, deep models are relatively stable under Gaussian noise.
+- `LSTM` changes only slightly in F1 under noise.
+- `GRU` also remains close to its original score.
+- Automata shows measurable sensitivity through changed anomaly behavior, but remains analyzable through its symbolic path structure.
+- On BATADAL, deep models remain weak on anomaly recall, and automata shows a small positive shift in F1 under the saved noisy run.
 
-Yorum:
+## 8. Unseen Behavior Analysis
 
-- Pencere boyutu arttikca state sayisi ve unseen sayisi buyuyor.
-- BATADAL'da recall/F1 kazanci ile accuracy kaybi arasinda belirgin bir trade-off var.
-- SKAB'ta daha dengeli ama daha sinirli bir iyilesme goruluyor.
+The unseen outputs are:
 
-## 9. Teslim Durumu
+- [results/tables/unseen_metrics.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/unseen_metrics.csv)
+- [results/explanations/unseen_explanations.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/explanations/unseen_explanations.csv)
 
-Bu revizyon sonrasinda daha once eksik olan maddeler su sekilde kapatilmistir:
+Current findings:
 
-- Parametrik derin model mimarisi: tamamlandi
-- CNN tanimi ile kodun uyumu: tamamlandi
-- Deney parametrelerinin sistematik loglanmasi: tamamlandi
-- Eksik veri islemi veya eksik yok audit'i: tamamlandi
-- README ve final rapor teslimi: tamamlandi
-- BATADAL `ATT_FLAG` bilgisinin raporda acikca belirtilmesi: tamamlandi
+- SKAB unseen ratio is low in the saved snapshot.
+- BATADAL unseen ratio is clearly higher.
+- Mapping success is preserved through nearest-pattern matching.
+- BATADAL unseen cases are more strongly associated with anomaly behavior than SKAB in the current outputs.
 
-## 10. Sinirlar ve Sonraki Adim
+This supports the report requirement to discuss unseen-pattern behavior explicitly.
 
-- `generate_figures.py` icin mevcut ortamda `seaborn` eksik; bu nedenle PNG figurler bu geciste yeniden uretilmedi.
-- Noise ve unseen artefaktlari, yeni CNN destekli tam kosunun tekrar alinmasiyla daha da guncellenebilir.
-- BATADAL icin class imbalance'a duyarli threshold tuning veya cost-sensitive egitim, derin modellerin anomaly recall/F1 skorlarini iyilestirebilir.
+## 9. Parameter Sensitivity
+
+The automata parameter output is:
+
+- [results/tables/parameter_analysis_metrics.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/parameter_analysis_metrics.csv)
+
+The saved results show the intended trade-off:
+
+- larger `window_size` generally increases state count
+- richer symbolic alphabets can increase unseen patterns
+- transition density tends to drop as the symbolic state space grows
+- some settings improve F1, but often at the cost of a more complex and sparser automata structure
+
+This is exactly the kind of parameter-effect discussion requested by the assignment.
+
+## 10. Explainability Output Standardization
+
+The automata model already produces rich per-step explanations, but the delivery format is now standardized around a fixed schema.
+
+Schema source:
+
+- [src/models/automata/explainability.py](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/src/models/automata/explainability.py)
+
+Schema test:
+
+- [tests/test_automata.py](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/tests/test_automata.py)
+
+Expected fields include:
+
+- `time_step`
+- `state`
+- `previous_state`
+- `pattern`
+- `status`
+- `mapped_to`
+- `distance`
+- `transition_probability`
+- `path_probability`
+- `confidence_score`
+- `decision_reason`
+- `decision`
+
+Example JSON artifact:
+
+- [results/explanations/automata_explanation_example.json](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/explanations/automata_explanation_example.json)
+
+This directly addresses the requirement that explainability output should be presented in JSON or table form with a stable schema.
+
+## 11. Runtime Reporting
+
+The assignment appendix asks for model runtime comparison. The codebase now writes runtime artifacts for both families:
+
+- [results/tables/deep_learning_runtime_metrics.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/deep_learning_runtime_metrics.csv)
+- [results/tables/deep_learning_runtime_summary.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/deep_learning_runtime_summary.csv)
+- [results/tables/automata_runtime_metrics.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/automata_runtime_metrics.csv)
+- [results/tables/automata_runtime_summary.csv](/C:/Users/Esma%20Nur%20Mant%C4%B1/Desktop/probabilistic-automata-time-series/results/tables/automata_runtime_summary.csv)
+
+These files record:
+
+- training time in seconds
+- inference time in seconds
+- split name
+- test example count
+
+This makes runtime comparison a first-class artifact instead of a manual note.
+
+## 12. Conclusion
+
+The project now aligns with the requested delivery logic more clearly:
+
+- deep-learning artifacts include `CNN`
+- SKAB deep predictions are fold-aware in saved outputs
+- BATADAL label naming is explicitly documented as `ATT_FLAG`
+- the required analysis categories are written as report text, not only computed in code
+- explainability output is standardized and test-backed
+- runtime reporting is now generated as structured CSV output
+
+The remaining work, if desired, is mostly presentation-oriented:
+
+- regenerate all figures with the full pipeline
+- enrich the table appendix further
+- optionally regenerate all result files again through `python src/experiments/run_all.py`

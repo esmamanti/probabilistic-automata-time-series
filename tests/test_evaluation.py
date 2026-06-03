@@ -137,11 +137,11 @@ def test_cross_family_statistical_outputs_include_automata(monkeypatch):
 
     monkeypatch.setattr(
         "experiments.run_deep_models.run_skab_experiment",
-        lambda config, models_config: (automata_explanations.copy(), automata_metrics.copy()),
+        lambda config, models_config: (automata_explanations.copy(), automata_metrics.copy(), pd.DataFrame()),
     )
     monkeypatch.setattr(
         "experiments.run_deep_models.run_batadal_experiment",
-        lambda config, models_config: (pd.DataFrame(columns=automata_explanations.columns), pd.DataFrame(columns=automata_metrics.columns)),
+        lambda config, models_config: (pd.DataFrame(columns=automata_explanations.columns), pd.DataFrame(columns=automata_metrics.columns), pd.DataFrame()),
     )
 
     summary_df, wilcoxon_df, mcnemar_df = build_cross_family_statistical_outputs(
