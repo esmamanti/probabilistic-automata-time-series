@@ -13,6 +13,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from data.data_module import DataModule
+from evaluation.metrics import aggregate_metrics_frame
 from experiments.run_automata import build_automata_model, compute_metrics, derive_pattern_labels, extract_1d_series
 from utils.config import load_config
 from utils.seed import clone_config_with_seed, get_experiment_seeds
@@ -84,6 +85,25 @@ def evaluate_parameter_setting(
     }
 
 
+def build_parameter_analysis_summary(results_df: pd.DataFrame) -> pd.DataFrame:
+    metric_columns = [
+        "accuracy",
+        "precision",
+        "recall",
+        "f1_score",
+        "state_count",
+        "transition_sources",
+        "transition_density",
+        "unseen_examples",
+    ]
+    available_metric_columns = [column for column in metric_columns if column in results_df.columns]
+    return aggregate_metrics_frame(
+        results_df,
+        group_columns=["dataset", "split", "window_size", "alphabet_size"],
+        metric_columns=available_metric_columns,
+    )
+
+
 def main() -> None:
     config = load_config(PROJECT_ROOT / "configs" / "config.yaml")
     models_config = load_config(PROJECT_ROOT / "configs" / "models.yaml")
@@ -119,12 +139,24 @@ def main() -> None:
                         )
 
     results_df = pd.DataFrame(rows)
+    summary_df = build_parameter_analysis_summary(results_df)
     results_df.to_csv(tables_dir / "parameter_analysis_metrics.csv", index=False)
+    summary_df.to_csv(tables_dir / "parameter_analysis_metrics_summary.csv", index=False)
     with (explanations_dir / "parameter_analysis_summary.json").open("w", encoding="utf-8") as handle:
-        json.dump(results_df.to_dict(orient="records"), handle, indent=2)
+        json.dump(
+            {
+                "runs": results_df.to_dict(orient="records"),
+                "summary": summary_df.to_dict(orient="records"),
+            },
+            handle,
+            indent=2,
+        )
 
     print("=== Parameter Analysis Summary ===")
     print(results_df.to_string(index=False))
+    print()
+    print("=== Parameter Analysis Aggregated Summary ===")
+    print(summary_df.to_string(index=False))
 
 
 if __name__ == "__main__":

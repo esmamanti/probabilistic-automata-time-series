@@ -31,6 +31,9 @@ from evaluation.statistical_tests import (
     run_mcnemar_test,
     run_wilcoxon_signed_rank_test,
 )
+from experiments.run_automata import build_automata_summary
+from experiments.run_noise_experiment import build_noise_summary
+from experiments.run_parameter_analysis import build_parameter_analysis_summary
 
 
 def test_compute_metrics_and_confusion_outputs_expected_values():
@@ -75,6 +78,36 @@ def test_aggregate_metrics_frame_computes_group_statistics():
 
     assert aggregated.loc[0, "accuracy_mean"] == 0.8
     assert aggregated.loc[0, "f1_score_max"] == 0.7
+
+
+def test_experiment_summary_builders_compute_mean_and_std_outputs():
+    automata_metrics = pd.DataFrame(
+        [
+            {"dataset": "SKAB", "split": "fold_0", "decision_score_field": "path_probability", "accuracy": 0.8, "f1_score": 0.7, "unseen_examples": 2},
+            {"dataset": "SKAB", "split": "fold_0", "decision_score_field": "path_probability", "accuracy": 0.6, "f1_score": 0.5, "unseen_examples": 4},
+        ]
+    )
+    noise_metrics = pd.DataFrame(
+        [
+            {"dataset": "SKAB", "family": "DEEP", "model": "LSTM", "split": "fold_0", "scenario": "noise", "accuracy": 0.8, "f1_score": 0.7},
+            {"dataset": "SKAB", "family": "DEEP", "model": "LSTM", "split": "fold_0", "scenario": "noise", "accuracy": 0.6, "f1_score": 0.5},
+        ]
+    )
+    parameter_metrics = pd.DataFrame(
+        [
+            {"dataset": "SKAB", "split": "fold_0", "window_size": 4, "alphabet_size": 3, "accuracy": 0.8, "state_count": 10},
+            {"dataset": "SKAB", "split": "fold_0", "window_size": 4, "alphabet_size": 3, "accuracy": 0.6, "state_count": 14},
+        ]
+    )
+
+    automata_summary = build_automata_summary(automata_metrics)
+    noise_summary = build_noise_summary(noise_metrics)
+    parameter_summary = build_parameter_analysis_summary(parameter_metrics)
+
+    assert automata_summary.loc[0, "accuracy_mean"] == 0.7
+    assert automata_summary.loc[0, "unseen_examples_mean"] == 3.0
+    assert noise_summary.loc[0, "f1_score_mean"] == 0.6
+    assert parameter_summary.loc[0, "state_count_mean"] == 12.0
 
 
 def test_evaluator_builds_metrics_and_statistical_results():

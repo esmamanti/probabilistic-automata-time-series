@@ -18,6 +18,7 @@ from data.load_batadal import get_batadal_feature_columns, load_batadal_dataset
 from data.load_skab import get_skab_feature_columns, load_skab_dataset
 from data.preprocessing.preprocessing_pipeline import PreprocessingPipeline
 from data.split import generate_skab_group_folds, split_batadal_by_time, split_features_and_target
+from evaluation.metrics import aggregate_metrics_frame
 from models.automata.automata_model import ProbabilisticAutomataModel
 from utils.config import load_config
 from utils.seed import clone_config_with_seed, get_experiment_seeds, get_primary_seed
@@ -344,6 +345,26 @@ def run_batadal_experiment(config: dict, models_config: dict) -> tuple[pd.DataFr
     return explanations_df, pd.DataFrame([metrics])
 
 
+def build_automata_summary(metrics_df: pd.DataFrame) -> pd.DataFrame:
+    metric_columns = [
+        "accuracy",
+        "precision",
+        "recall",
+        "f1_score",
+        "path_probability",
+        "average_log_probability",
+        "test_examples",
+        "seen_examples",
+        "unseen_examples",
+    ]
+    available_metric_columns = [column for column in metric_columns if column in metrics_df.columns]
+    return aggregate_metrics_frame(
+        metrics_df,
+        group_columns=["dataset", "split", "decision_score_field"],
+        metric_columns=available_metric_columns,
+    )
+
+
 def save_outputs(
     explanations_dir: Path,
     tables_dir: Path,
@@ -351,30 +372,36 @@ def save_outputs(
     skab_metrics: pd.DataFrame,
     batadal_explanations: pd.DataFrame,
     batadal_metrics: pd.DataFrame,
+    summary_df: pd.DataFrame,
 ) -> None:
     skab_explanations.to_csv(explanations_dir / "automata_skab_explanations.csv", index=False)
     batadal_explanations.to_csv(explanations_dir / "automata_batadal_explanations.csv", index=False)
     skab_metrics.to_csv(tables_dir / "automata_skab_metrics.csv", index=False)
     batadal_metrics.to_csv(tables_dir / "automata_batadal_metrics.csv", index=False)
+    summary_df.to_csv(tables_dir / "automata_metrics_summary.csv", index=False)
 
     with (explanations_dir / "automata_summary.json").open("w", encoding="utf-8") as handle:
         json.dump(
             {
                 "SKAB": skab_metrics.to_dict(orient="records"),
                 "BATADAL": batadal_metrics.to_dict(orient="records"),
+                "summary": summary_df.to_dict(orient="records"),
             },
             handle,
             indent=2,
         )
 
 
-def print_summary(skeb_metrics: pd.DataFrame, batadal_metrics: pd.DataFrame) -> None:
+def print_summary(skeb_metrics: pd.DataFrame, batadal_metrics: pd.DataFrame, summary_df: pd.DataFrame) -> None:
     print("=== Automata Summary ===")
     print("SKAB folds:")
     print(skeb_metrics.to_string(index=False))
     print()
     print("BATADAL:")
     print(batadal_metrics.to_string(index=False))
+    print()
+    print("Aggregated Mean/Std:")
+    print(summary_df.to_string(index=False))
 
 
 def main() -> None:
@@ -403,6 +430,7 @@ def main() -> None:
     skab_metrics = pd.concat(all_skab_metrics, ignore_index=True)
     batadal_explanations = pd.concat(all_batadal_explanations, ignore_index=True)
     batadal_metrics = pd.concat(all_batadal_metrics, ignore_index=True)
+    summary_df = build_automata_summary(pd.concat([skab_metrics, batadal_metrics], ignore_index=True))
     save_outputs(
         explanations_dir=explanations_dir,
         tables_dir=tables_dir,
@@ -410,8 +438,9 @@ def main() -> None:
         skab_metrics=skab_metrics,
         batadal_explanations=batadal_explanations,
         batadal_metrics=batadal_metrics,
+        summary_df=summary_df,
     )
-    print_summary(skab_metrics, batadal_metrics)
+    print_summary(skab_metrics, batadal_metrics, summary_df)
 
 
 if __name__ == "__main__":

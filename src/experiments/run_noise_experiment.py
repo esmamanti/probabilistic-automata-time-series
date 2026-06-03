@@ -12,6 +12,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from data.data_module import DataModule
+from evaluation.metrics import aggregate_metrics_frame
 from experiments.run_automata import build_automata_model, compute_metrics, derive_pattern_labels, extract_1d_series
 from experiments.run_deep_models import build_model, build_trainer, resolve_device
 from utils.config import load_config
@@ -132,6 +133,23 @@ def run_automata_noise_experiment_for_dataset(
     return pd.DataFrame(metrics_rows)
 
 
+def build_noise_summary(metrics_df: pd.DataFrame) -> pd.DataFrame:
+    metric_columns = [
+        "accuracy",
+        "precision",
+        "recall",
+        "f1_score",
+        "test_examples",
+        "unseen_examples",
+    ]
+    available_metric_columns = [column for column in metric_columns if column in metrics_df.columns]
+    return aggregate_metrics_frame(
+        metrics_df,
+        group_columns=["dataset", "family", "model", "split", "scenario"],
+        metric_columns=available_metric_columns,
+    )
+
+
 def main() -> None:
     config = load_config(PROJECT_ROOT / "configs" / "config.yaml")
     models_config = load_config(PROJECT_ROOT / "configs" / "models.yaml")
@@ -150,12 +168,24 @@ def main() -> None:
             frame["seed"] = int(seed)
             results.append(frame)
     metrics_df = pd.concat(results, ignore_index=True)
+    summary_df = build_noise_summary(metrics_df)
     metrics_df.to_csv(tables_dir / "noise_experiment_metrics.csv", index=False)
+    summary_df.to_csv(tables_dir / "noise_experiment_metrics_summary.csv", index=False)
     with (explanations_dir / "noise_experiment_summary.json").open("w", encoding="utf-8") as handle:
-        json.dump(metrics_df.to_dict(orient="records"), handle, indent=2)
+        json.dump(
+            {
+                "runs": metrics_df.to_dict(orient="records"),
+                "summary": summary_df.to_dict(orient="records"),
+            },
+            handle,
+            indent=2,
+        )
 
     print("=== Noise Experiment Summary ===")
     print(metrics_df.to_string(index=False))
+    print()
+    print("=== Noise Aggregated Summary ===")
+    print(summary_df.to_string(index=False))
 
 
 if __name__ == "__main__":
