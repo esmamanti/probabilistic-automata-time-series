@@ -59,7 +59,7 @@ class ExplainabilityEngine:
                     "probability": float(probability),
                     "path_probability": float(cumulative_probability),
                     "average_log_probability": float(average_log_probability),
-                    "confidence_score": float(resolution.confidence_score),
+                    "confidence_score": float(cumulative_probability),
                     "decision_reason": decision_reason,
                     "decision": "anomaly" if is_anomaly else "normal",
                 }

@@ -11,7 +11,6 @@ class PatternResolution:
     status: str
     mapped_pattern: str
     distance: int
-    confidence_score: float
 
 
 class UnseenPatternHandler:
@@ -27,7 +26,6 @@ class UnseenPatternHandler:
                 status="seen",
                 mapped_pattern=pattern,
                 distance=0,
-                confidence_score=1.0,
             )
 
         ranked_patterns = sorted(
@@ -35,12 +33,9 @@ class UnseenPatternHandler:
             key=lambda item: (item[1], item[0]),
         )
         mapped_pattern, distance = ranked_patterns[0]
-        normalizer = max(len(pattern), len(mapped_pattern), 1)
-        confidence_score = max(0.0, 1.0 - (distance / normalizer))
         return PatternResolution(
             original_pattern=pattern,
             status="unseen",
             mapped_pattern=mapped_pattern,
             distance=distance,
-            confidence_score=confidence_score,
         )

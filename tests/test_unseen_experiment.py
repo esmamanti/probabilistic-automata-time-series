@@ -27,8 +27,8 @@ def test_compute_subset_metrics_handles_empty_predictions():
 def test_summarize_unseen_subset_reports_counts_and_scores():
     predictions_df = pd.DataFrame(
         [
-            {"true_label": 1, "predicted_label": 1, "distance": 1, "confidence_score": 0.75},
-            {"true_label": 0, "predicted_label": 1, "distance": 2, "confidence_score": 0.50},
+            {"true_label": 1, "predicted_label": 1, "distance": 1, "confidence_score": 0.25},
+            {"true_label": 0, "predicted_label": 1, "distance": 2, "confidence_score": 0.10},
         ]
     )
 
@@ -46,3 +46,4 @@ def test_summarize_unseen_subset_reports_counts_and_scores():
     assert summary["unseen_examples"] == 2
     assert summary["accuracy"] == 0.5
     assert summary["avg_unseen_distance"] == 1.5
+    assert summary["avg_unseen_confidence"] == 0.175

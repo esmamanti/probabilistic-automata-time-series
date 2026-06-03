@@ -68,7 +68,6 @@ class ProbabilisticAutomataModel:
                     status="seen",
                     mapped_pattern=pattern,
                     distance=0,
-                    confidence_score=1.0,
                 )
                 for pattern in patterns
             ]

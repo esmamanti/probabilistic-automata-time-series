@@ -22,6 +22,7 @@ def test_automata_model_produces_explanations_for_seen_patterns():
     assert all("decision_reason" in explanation for explanation in result["explanations"])
     assert all("path_probability" in explanation for explanation in result["explanations"])
     assert all("average_log_probability" in explanation for explanation in result["explanations"])
+    assert all(explanation["confidence_score"] == explanation["path_probability"] for explanation in result["explanations"])
 
 
 def test_automata_model_marks_unseen_patterns_as_anomaly():
@@ -40,6 +41,7 @@ def test_automata_model_marks_unseen_patterns_as_anomaly():
     assert any(explanation["status"] == "unseen" for explanation in result["explanations"])
     assert any(explanation["decision"] == "anomaly" for explanation in result["explanations"])
     assert any(explanation["decision_reason"] == "unseen_pattern" for explanation in result["explanations"])
+    assert all(explanation["confidence_score"] == explanation["path_probability"] for explanation in result["explanations"])
 
 
 def test_calibrate_threshold_finds_f1_optimal_split():
