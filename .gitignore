@@ -1,6 +1,9 @@
+.venv/
 venv/
 __pycache__/
 *.pyc
+.idea/
+.vscode/
 
 data/processed/
 data/splits/

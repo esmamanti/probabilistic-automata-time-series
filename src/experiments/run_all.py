@@ -19,12 +19,18 @@ STAGE_OUTPUTS = {
     "automata": [
         "results/tables/automata_skab_metrics.csv",
         "results/tables/automata_batadal_metrics.csv",
+        "results/tables/automata_metrics_summary.csv",
+        "results/tables/automata_runtime_metrics.csv",
+        "results/tables/automata_runtime_summary.csv",
         "results/explanations/automata_summary.json",
     ],
     "deep_learning": [
         "results/tables/deep_learning_metrics.csv",
         "results/tables/deep_learning_metrics_summary.csv",
+        "results/tables/deep_learning_runtime_metrics.csv",
+        "results/tables/deep_learning_runtime_summary.csv",
         "results/explanations/deep_learning_predictions.csv",
+        "results/explanations/deep_learning_summary.json",
     ],
     "noise": [
         "results/tables/noise_experiment_metrics.csv",
