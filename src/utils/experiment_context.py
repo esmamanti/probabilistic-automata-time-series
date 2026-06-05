@@ -1,3 +1,14 @@
+"""
+experiment_context.py
+
+Her deney kaydina tam config snapshot'i ekler.
+Bu sayede herhangi bir CSV satiri, hangi parametrelerle uretildigini
+bagimsiz olarak gosterir. Yeniden uretilebilirlik icin tasarlanmistir.
+
+Not: context_ onekli kolonlar raporlamada kullanilmaz;
+sadece izlenebilirlik ve hata ayiklama icin saklanir.
+"""
+
 from __future__ import annotations
 
 import json

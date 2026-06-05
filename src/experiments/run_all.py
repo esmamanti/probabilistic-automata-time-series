@@ -11,7 +11,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 import main as project_main
-from experiments import generate_figures, run_automata, run_deep_models, run_noise_experiment, run_parameter_analysis, run_unseen_experiment
+from experiments import generate_figures, run_automata, run_deep_models, run_noise_experiment, run_parameter_analysis, run_statistical_tests, run_unseen_experiment
 from experiments import run_cross_dataset_experiment, run_explainability_export, run_runtime_analysis
 from utils.config import load_config
 
@@ -61,6 +61,10 @@ STAGE_OUTPUTS = {
     "runtime_analysis": [
         "results/runtime/runtime_comparison.csv",
         "results/runtime/runtime_comparison.png",
+    ],
+    "statistical_tests": [
+        "results/tables/wilcoxon_results.csv",
+        "results/tables/mcnemar_results.csv",
     ],
     "figures": [
         "results/figures/confusion_matrix_best_model.png",
@@ -260,6 +264,14 @@ def main() -> None:
             runner=run_runtime_analysis.main,
             resume_existing=resume_existing,
         )
+
+    _run_stage(
+        config=config,
+        stage_name="statistical_tests",
+        label="Statistical Tests",
+        runner=run_statistical_tests.main,
+        resume_existing=resume_existing,
+    )
 
     if any(bool(enabled) for enabled in plots_config.values()):
         _run_stage(
