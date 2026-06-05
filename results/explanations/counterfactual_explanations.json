@@ -1,0 +1,2621 @@
+[
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "abbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.2419214889361976,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 6.768999702668054e-20,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbab",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abab",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "babc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aabc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "babc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aabc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "abcb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abab",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "abbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "normal",
+    "original_probability": 2.1106057884506533e-53,
+    "counterfactual_probability": 0.2539533141493966,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "caaa",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aaaa",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "abbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4823308522765373,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "baac",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aaac",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbac",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbaa",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.6976102278619946,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bacb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "baab",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.2972821776090784,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "acbb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aabb",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.5805716018204043,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbab",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abab",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "abbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aabc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "abbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.2458867518740543,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "caaa",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aaaa",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccaa",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbaa",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abaa",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbca",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbaa",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcab",
+    "original_decision": "anomaly",
+    "mapped_pattern": "baab",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.3103313522006434,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "abac",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aaac",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bacc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aacc",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.9980040916121948,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "caaa",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aaaa",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "baba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "babc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aabc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "aabc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aaac",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "abcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aacc",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.9987017310252996,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "babc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aabc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "babc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aabc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "abca",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abaa",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcab",
+    "original_decision": "anomaly",
+    "mapped_pattern": "baab",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.1406173344874242,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cabb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aabb",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.5665906773051772,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "babc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aabc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "abcb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abab",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccaa",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbaa",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abaa",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "abcb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abab",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "abbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aabc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 6.768999702668054e-20,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbab",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abab",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "babc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aabc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "normal",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.4991764412278513,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbbc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "bbcb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "ccba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbcc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abcc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "babc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "aabc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "abcb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abab",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "accc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcac",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acac",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcac",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acac",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "accc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acbb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "accc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acbb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "accc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcac",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acac",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcac",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acac",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "accc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acbb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "accc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acbb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "accc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcac",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acac",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcac",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acac",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "accc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acbb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "accc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acbb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "accc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcac",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acac",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcac",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acac",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "accc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acbb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "accc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acbb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "accc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcac",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acac",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bcac",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acac",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "accc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acbb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "bccc",
+    "original_decision": "anomaly",
+    "mapped_pattern": "accc",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "ccbb",
+    "original_decision": "anomaly",
+    "mapped_pattern": "acbb",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  },
+  {
+    "original_pattern": "cbba",
+    "original_decision": "anomaly",
+    "mapped_pattern": "abba",
+    "counterfactual_decision": "anomaly",
+    "original_probability": 0.0,
+    "counterfactual_probability": 0.0,
+    "levenshtein_distance": 1
+  }
+]

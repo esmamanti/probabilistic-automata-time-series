@@ -6,6 +6,7 @@ from pathlib import Path
 from uuid import uuid4
 
 import pandas as pd
+import pytest
 
 from experiments import generate_figures, run_all
 from models.automata.automata_model import ProbabilisticAutomataModel
@@ -16,9 +17,15 @@ from utils.config import load_config
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
+def require_artifact(path: Path) -> Path:
+    if not path.exists():
+        pytest.skip(f"Required artifact is missing: {path}. Run the experiment pipeline first.")
+    return path
+
+
 def test_saved_deep_learning_artifacts_match_requirement_contract():
-    metrics_df = pd.read_csv(PROJECT_ROOT / "results" / "tables" / "deep_learning_metrics.csv", low_memory=False)
-    predictions_df = pd.read_csv(PROJECT_ROOT / "results" / "explanations" / "deep_learning_predictions.csv", low_memory=False)
+    metrics_df = pd.read_csv(require_artifact(PROJECT_ROOT / "results" / "tables" / "deep_learning_metrics.csv"), low_memory=False)
+    predictions_df = pd.read_csv(require_artifact(PROJECT_ROOT / "results" / "explanations" / "deep_learning_predictions.csv"), low_memory=False)
 
     assert {"CNN", "GRU", "LSTM"}.issubset(set(metrics_df["model"].dropna().astype(str)))
     assert set(metrics_df["seed"].dropna().astype(int)) == {7, 42, 123, 999, 2026}
@@ -33,19 +40,19 @@ def test_saved_deep_learning_artifacts_match_requirement_contract():
 
 
 def test_saved_noise_and_unseen_artifacts_cover_required_scenarios():
-    noise_df = pd.read_csv(PROJECT_ROOT / "results" / "tables" / "noise_experiment_metrics.csv")
-    unseen_df = pd.read_csv(PROJECT_ROOT / "results" / "tables" / "unseen_metrics.csv")
+    noise_df = pd.read_csv(require_artifact(PROJECT_ROOT / "results" / "tables" / "noise_experiment_metrics.csv"))
+    unseen_df = pd.read_csv(require_artifact(PROJECT_ROOT / "results" / "tables" / "unseen_metrics.csv"))
 
     assert {"original", "noise"}.issubset(set(noise_df["scenario"].dropna().astype(str)))
     assert {"SKAB", "BATADAL"}.issubset(set(noise_df["dataset"].dropna().astype(str)))
     assert {"DEEP", "AUTOMATA"}.issubset(set(noise_df["family"].dropna().astype(str)))
     assert {"SKAB", "BATADAL"}.issubset(set(unseen_df["dataset"].dropna().astype(str)))
-    assert (PROJECT_ROOT / "results" / "explanations" / "unseen_summary.json").stat().st_size > 0
-    assert (PROJECT_ROOT / "results" / "explanations" / "noise_experiment_summary.json").stat().st_size > 0
+    assert require_artifact(PROJECT_ROOT / "results" / "explanations" / "unseen_summary.json").stat().st_size > 0
+    assert require_artifact(PROJECT_ROOT / "results" / "explanations" / "noise_experiment_summary.json").stat().st_size > 0
 
 
 def test_parameter_analysis_grid_and_baseline_setting_are_complete():
-    parameter_df = pd.read_csv(PROJECT_ROOT / "results" / "tables" / "parameter_analysis_metrics.csv")
+    parameter_df = pd.read_csv(require_artifact(PROJECT_ROOT / "results" / "tables" / "parameter_analysis_metrics.csv"))
     models_config = load_config(PROJECT_ROOT / "configs" / "models.yaml")
     expected_grid = set(product(range(3, 7), range(3, 7)))
 

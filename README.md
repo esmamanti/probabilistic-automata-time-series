@@ -1,77 +1,161 @@
 # probabilistic-automata-time-series
 
-Bu repo, `yazlab2_v3.pdf` isterlerine uygun olarak zaman serisi anomali tespiti icin iki model ailesini karsilastirir:
+Bu repo, "From Black-Box to Explainability: Probabilistic Automata for Time Series Analysis" projesi icin zaman serisi anomali tespiti deneylerini uretir. Karsilastirilan iki ana model ailesi:
 
-- Olasiliksal otomata tabanli sembolik model
-- Derin ogrenme modelleri: `LSTM`, `GRU`, `CNN`
+- Probabilistic automata tabanli sembolik model
+- Deep learning modelleri: `LSTM`, `GRU`, `CNN`
 
-## Kapsam
+## Dataset Summary
 
-- Veri kumeleri: `SKAB` ve `BATADAL`
-- Senaryolar: `original`, `noise`, `unseen`
-- Parametre analizi: `window_size = 3..6`, `alphabet_size = 3..6`
-- Istatistiksel analiz: Wilcoxon ve McNemar
-- Olasiliksal aciklanabilirlik: state, pattern, transition probability, path probability, confidence
+Kullanilan veri kumeleri:
 
-## Veri Kumesi Kullanimi
+- `SKAB`: sadece `valve1` ve `valve2`
+- `BATADAL`: sadece `BATADAL_dataset04.csv` (Training Dataset 2)
 
-| Dataset | Hedef kolon | Bu repodaki kullanim |
-| --- | --- | --- |
-| SKAB | `anomaly` | Sadece `valve1` ve `valve2` birlestirilir; `source_group` ve `source_file` takip icin eklenir |
-| BATADAL | `ATT_FLAG` | Sadece `BATADAL_dataset04.csv` kullanilir; etiketler `-999 -> 0`, `1 -> 1` olarak map edilir |
+Bu repoda `SWAT` veya `WADI` kullanilmaz.
 
-Notlar:
+## Model Comparison
 
-- BATADAL hedef etiketi acik olarak `ATT_FLAG` kolonudur.
-- SKAB model girdisine `datetime`, `changepoint`, `source_group`, `source_file` alinmaz.
-- BATADAL zaman sirasi korunarak `%60 / %20 / %20` train/validation/test ayrimi ile calisir.
+Merkezi dosyalar:
 
-## Mimari
+- [configs/config.yaml](configs/config.yaml)
+- [configs/models.yaml](configs/models.yaml)
+- [configs/experiments.yaml](configs/experiments.yaml)
+- [src/experiments/run_all.py](src/experiments/run_all.py)
 
-- Merkezi config: [configs/config.yaml](configs/config.yaml)
-- Model config: [configs/models.yaml](configs/models.yaml)
-- Deney config: [configs/experiments.yaml](configs/experiments.yaml)
-- Tum pipeline orkestrasyonu: [src/experiments/run_all.py](src/experiments/run_all.py)
+Baslica ciktilar:
 
-Temel noktalar:
+- [results/tables/deep_learning_metrics.csv](results/tables/deep_learning_metrics.csv)
+- [results/tables/automata_metrics_summary.csv](results/tables/automata_metrics_summary.csv)
+- [results/tables/model_comparison_metrics_summary.csv](results/tables/model_comparison_metrics_summary.csv)
 
-- preprocessing sadece train verisi uzerinde fit edilir
-- PCA, automata icin tek boyuta (`PC1`) indirger
-- SKAB grup bazli fold degerlendirmesi kullanir
-- BATADAL zaman sirali degerlendirme kullanir
-- unseen pattern'ler Levenshtein ile en yakin bilinen pattern'e map edilir
-- deney baglami CSV ve JSON artifact'lerine yazilir
+## Cross-Dataset
 
-## Uretilen Artifact'ler
+Train/test yonleri:
 
-Ana ciktilar:
+- `SKAB -> BATADAL`
+- `BATADAL -> SKAB`
 
-- [results/tables](results/tables)
-- [results/explanations](results/explanations)
-- [results/figures](results/figures)
-- [results/logs](results/logs)
+Ciktilar:
 
-Isterlerle hizali kritik dosyalar:
+- [results/cross_dataset/cross_dataset_results.csv](results/cross_dataset/cross_dataset_results.csv)
+- [results/cross_dataset/cross_dataset_summary.csv](results/cross_dataset/cross_dataset_summary.csv)
+- [results/cross_dataset/cross_dataset_matrix.png](results/cross_dataset/cross_dataset_matrix.png)
 
-- Deep metrics: [results/tables/deep_learning_metrics.csv](results/tables/deep_learning_metrics.csv)
-- Deep summary: [results/tables/deep_learning_metrics_summary.csv](results/tables/deep_learning_metrics_summary.csv)
-- Model comparison: [results/tables/model_comparison_metrics_summary.csv](results/tables/model_comparison_metrics_summary.csv)
-- Noise metrics: [results/tables/noise_experiment_metrics.csv](results/tables/noise_experiment_metrics.csv)
-- Unseen metrics: [results/tables/unseen_metrics.csv](results/tables/unseen_metrics.csv)
-- Parameter analysis: [results/tables/parameter_analysis_metrics.csv](results/tables/parameter_analysis_metrics.csv)
-- Deep predictions: [results/explanations/deep_learning_predictions.csv](results/explanations/deep_learning_predictions.csv)
-- Automata explanations: [results/explanations/automata_skab_explanations.csv](results/explanations/automata_skab_explanations.csv)
-- Explanation JSON example: [results/explanations/automata_explanation_example.json](results/explanations/automata_explanation_example.json)
-- Pipeline progress: [results/logs/pipeline_progress.json](results/logs/pipeline_progress.json)
+## Noise Robustness
 
-## Son Durum Ozeti
+Gaussian noise seviyeleri:
 
-- `results/tables/deep_learning_metrics.csv` artik `LSTM`, `GRU` ve `CNN` sonuclarini icerir.
-- `results/explanations/deep_learning_predictions.csv` icinde SKAB split'leri `fold_0` ... `fold_4` olarak kaydedilir.
-- BATADAL split'i `test` olarak tutulur.
-- Aciklanabilirlik ciktilari tablo + JSON ornegi formatinda mevcuttur.
+- `0.05`
+- `0.10`
+- `0.20`
 
-## Beklenen Gorseller
+Ciktilar:
+
+- [results/noise/noise_robustness_results.csv](results/noise/noise_robustness_results.csv)
+- [results/noise/noise_robustness_plot.png](results/noise/noise_robustness_plot.png)
+- [results/tables/noise_experiment_metrics.csv](results/tables/noise_experiment_metrics.csv)
+
+## Unseen Pattern
+
+Levenshtein mapping ile unseen pattern analizi:
+
+- [results/unseen/unseen_pattern_details.csv](results/unseen/unseen_pattern_details.csv)
+- [results/unseen/unseen_distance_accuracy.csv](results/unseen/unseen_distance_accuracy.csv)
+- [results/unseen/unseen_distance_accuracy.png](results/unseen/unseen_distance_accuracy.png)
+- [results/explanations/unseen_summary.json](results/explanations/unseen_summary.json)
+
+## State/Transition Analysis
+
+Grid:
+
+- `window_size: [3, 4, 5, 6]`
+- `alphabet_size: [3, 4, 5, 6]`
+
+Ciktilar:
+
+- [results/automata_analysis/state_transition_analysis.csv](results/automata_analysis/state_transition_analysis.csv)
+- [results/automata_analysis/state_count_vs_window.png](results/automata_analysis/state_count_vs_window.png)
+- [results/automata_analysis/transition_density_vs_window.png](results/automata_analysis/transition_density_vs_window.png)
+- [results/automata_analysis/f1_vs_window_alphabet.png](results/automata_analysis/f1_vs_window_alphabet.png)
+
+## Confidence Score
+
+Automata explanation export:
+
+- [results/explanations/automata_explanations.csv](results/explanations/automata_explanations.csv)
+- [results/explanations/automata_explanations.json](results/explanations/automata_explanations.json)
+- [results/explanations/confidence_histogram.png](results/explanations/confidence_histogram.png)
+
+Temel alanlar:
+
+- `dataset`
+- `time_step`
+- `state`
+- `pattern`
+- `status`
+- `mapped_to`
+- `path_probability`
+- `confidence_score`
+- `decision`
+- `true_label`
+
+## Counterfactual
+
+Unseen anomaly pattern'lar icin nearest seen pattern tabanli counterfactual export:
+
+- [results/explanations/counterfactual_explanations.json](results/explanations/counterfactual_explanations.json)
+
+## Runtime
+
+Runtime karsilastirma ciktilari:
+
+- [results/runtime/runtime_comparison.csv](results/runtime/runtime_comparison.csv)
+- [results/runtime/runtime_comparison.png](results/runtime/runtime_comparison.png)
+
+## Class Imbalance Problem in BATADAL
+
+BATADAL veri setinde anomaly oranı düşük olduğu için deep learning modelleri yüksek accuracy üretmesine rağmen anomaly sınıfını kaçırma eğilimi gösterebilir.
+
+## Why Accuracy is Misleading
+
+BATADAL gibi dengesiz veri setlerinde sadece accuracy metriğine bakmak yeterli değildir. Bu nedenle recall ve F1-score öncelikli değerlendirilir.
+
+## Threshold Calibration
+
+Deep learning modelleri için validation set üzerinde `0.01` ile `0.99` arasında threshold taraması yapılır ve en iyi F1-score üreten threshold testte kullanılır.
+
+İlgili çıktılar:
+
+- [results/thresholds/threshold_tuning_results.csv](results/thresholds/threshold_tuning_results.csv)
+- [results/thresholds/probability_distribution.csv](results/thresholds/probability_distribution.csv)
+- [results/thresholds/probability_distribution.png](results/thresholds/probability_distribution.png)
+
+## Weighted BCE Loss
+
+Deep learning eğitiminde class imbalance azaltmak için `pos_weight = negative_count / positive_count` yaklaşımıyla weighted BCE loss uygulanabilir.
+
+## Before/After Deep Learning Results
+
+BATADAL veri setinde anomaly oranı düşük olduğu için deep learning modelleri yüksek accuracy üretmesine rağmen anomaly sınıfını kaçırmıştır. Bu nedenle validation tabanlı threshold tuning ve weighted BCE loss uygulanmıştır. Bu iyileştirme ile model seçiminde accuracy yerine recall ve F1-score daha öncelikli değerlendirilmiştir.
+
+İlgili çıktılar:
+
+- [results/improvements/deep_learning_before_after.csv](results/improvements/deep_learning_before_after.csv)
+- [results/improvements/deep_learning_before_after.png](results/improvements/deep_learning_before_after.png)
+
+## Statistical Tests
+
+Istatistiksel degerlendirme:
+
+- Wilcoxon
+- McNemar
+
+Ilgili ozetler `results/tables/` altinda saklanir.
+
+## Visualizations
+
+Ana gorseller:
 
 - [results/figures/confusion_matrix_best_model.png](results/figures/confusion_matrix_best_model.png)
 - [results/figures/roc_curve_best_model.png](results/figures/roc_curve_best_model.png)
@@ -80,36 +164,15 @@ Isterlerle hizali kritik dosyalar:
 - [results/figures/transition_probability_heatmap_skab.png](results/figures/transition_probability_heatmap_skab.png)
 - [results/figures/parameter_sensitivity_skab.png](results/figures/parameter_sensitivity_skab.png)
 
-## Aciklanabilirlik Semasi
-
-Automata explanation kayitlari su alanlari raporlar:
-
-- `state`
-- `previous_state`
-- `pattern`
-- `status`
-- `mapped_to`
-- `distance`
-- `transition_probability`
-- `path_probability`
-- `average_log_probability`
-- `confidence_score`
-- `decision_reason`
-- `decision`
-
-Ornek JSON:
-
-- [results/explanations/automata_explanation_example.json](results/explanations/automata_explanation_example.json)
-
-## Calistirma
+## Run Order
 
 Tum pipeline:
 
 ```bash
-python src/experiments/run_all.py
+python src/experiments/run_all.py --no-resume
 ```
 
-Asama bazli komutlar:
+Asama bazli:
 
 ```bash
 python src/main.py
@@ -117,24 +180,31 @@ python src/experiments/run_automata.py
 python src/experiments/run_deep_models.py
 python src/experiments/run_noise_experiment.py
 python src/experiments/run_unseen_experiment.py
+python src/experiments/run_cross_dataset_experiment.py
 python src/experiments/run_parameter_analysis.py
+python src/experiments/run_explainability_export.py
+python src/experiments/run_runtime_analysis.py
 python src/experiments/generate_figures.py
 ```
 
-`run_all.py` asama bazli progress kaydi tutar ve mevcut artifact'ler varsa ilgili asamayi atlayabilir. Bu bilgi [results/logs/pipeline_progress.json](results/logs/pipeline_progress.json) dosyasina yazilir.
+`run_all.py` su sirayla calisir:
 
-## Dogrulama
+1. preprocessing
+2. model training and original test
+3. noise test
+4. unseen test
+5. cross-dataset test
+6. automata parameter analysis
+7. explainability export
+8. runtime analysis
+9. visualization generation
+
+Son satir:
+
+`All experiments completed successfully. Results saved under results/.`
+
+## Validation
 
 ```bash
 pytest -q
 ```
-
-Acceptance test kapsaminda sunlar dogrulanir:
-
-- Deep artifact'lerde `CNN`, `GRU`, `LSTM` varligi
-- SKAB fold split kayitlari
-- Noise ve unseen senaryolari
-- Parametre grid tamligi
-- Levenshtein unseen mapping davranisi
-- Explanation ic tutarliligi
-- Gorsel ve output artifact uretimi

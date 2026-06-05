@@ -250,6 +250,78 @@ def plot_parameter_sensitivity(
     return figure
 
 
+def plot_metric_heatmap(
+    metrics_df: pd.DataFrame,
+    *,
+    index: str,
+    columns: str,
+    values: str,
+    title: str,
+    cmap: str = "viridis",
+    fmt: str = ".2f",
+) -> plt.Figure:
+    required_columns = {index, columns, values}
+    missing_columns = required_columns.difference(metrics_df.columns)
+    if missing_columns:
+        raise KeyError(f"Required columns are missing from metrics frame: {sorted(missing_columns)}")
+
+    pivoted = metrics_df.pivot_table(index=index, columns=columns, values=values, aggfunc="mean")
+    if pivoted.empty:
+        raise ValueError("metrics_df does not contain any values to plot")
+
+    figure, axis = plt.subplots(figsize=(6, 5))
+    _draw_heatmap(
+        axis,
+        pivoted.to_numpy(dtype=float),
+        annotations=pivoted.to_numpy(dtype=float),
+        fmt=fmt,
+        cmap=cmap,
+        xticklabels=[str(label) for label in pivoted.columns.tolist()],
+        yticklabels=[str(label) for label in pivoted.index.tolist()],
+    )
+    axis.set_title(title)
+    axis.set_xlabel(columns)
+    axis.set_ylabel(index)
+    figure.tight_layout()
+    return figure
+
+
+def plot_histogram_by_label(
+    metrics_df: pd.DataFrame,
+    *,
+    value_column: str,
+    label_column: str,
+    title: str,
+    bins: int = 20,
+) -> plt.Figure:
+    required_columns = {value_column, label_column}
+    missing_columns = required_columns.difference(metrics_df.columns)
+    if missing_columns:
+        raise KeyError(f"Required columns are missing from metrics frame: {sorted(missing_columns)}")
+
+    figure, axis = plt.subplots(figsize=(7, 4))
+    grouped = metrics_df[[value_column, label_column]].dropna(subset=[value_column]).groupby(label_column, dropna=False)
+    plotted = False
+    for label_value, group_df in grouped:
+        axis.hist(
+            group_df[value_column].astype(float).to_numpy(),
+            bins=bins,
+            alpha=0.55,
+            label=str(label_value),
+        )
+        plotted = True
+
+    if not plotted:
+        raise ValueError("metrics_df does not contain any values to plot")
+
+    axis.set_title(title)
+    axis.set_xlabel(value_column)
+    axis.set_ylabel("Count")
+    axis.legend(title=label_column)
+    figure.tight_layout()
+    return figure
+
+
 def plot_transition_probability_heatmap(
     transition_probabilities: dict[int, dict[int, float]],
     *,

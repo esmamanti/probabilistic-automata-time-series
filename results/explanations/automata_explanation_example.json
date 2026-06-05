@@ -1,0 +1,14 @@
+{
+  "time_step": 0,
+  "state": 8,
+  "previous_state": NaN,
+  "pattern": "abab",
+  "status": "seen",
+  "mapped_to": "abab",
+  "distance": 0,
+  "transition_probability": 1.0,
+  "path_probability": 1.0,
+  "confidence_score": 1.0,
+  "decision_reason": "expected_transition",
+  "decision": "normal"
+}

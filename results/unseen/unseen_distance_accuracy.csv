@@ -1,0 +1,4 @@
+dataset,levenshtein_distance,accuracy
+BATADAL,1,0.5555555555555556
+SKAB,1,0.42032967032967034
+SKAB,2,0.25

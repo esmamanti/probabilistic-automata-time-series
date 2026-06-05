@@ -13,6 +13,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from data.data_module import DataModule
+from evaluation.plots import plot_parameter_sensitivity, save_figure
 from evaluation.metrics import aggregate_metrics_frame
 from experiments.run_automata import build_automata_model, compute_metrics, derive_pattern_labels, extract_1d_series
 from utils.config import load_config
@@ -28,10 +29,20 @@ def ensure_output_dirs(config: dict) -> tuple[Path, Path]:
     return explanations_dir, tables_dir
 
 
+def ensure_analysis_dir(config: dict) -> Path:
+    analysis_dir = PROJECT_ROOT / config["paths"]["automata_analysis"]
+    analysis_dir.mkdir(parents=True, exist_ok=True)
+    return analysis_dir
+
+
+def observed_transition_count(transition_counts: dict[int, dict[int, int]]) -> int:
+    return int(sum(len(targets) for targets in transition_counts.values()))
+
+
 def transition_density(transition_counts: dict[int, dict[int, int]], state_count: int) -> float:
     if state_count <= 0:
         return 0.0
-    actual_edges = sum(len(targets) for targets in transition_counts.values())
+    actual_edges = observed_transition_count(transition_counts)
     possible_edges = state_count * state_count
     return float(actual_edges / possible_edges) if possible_edges else 0.0
 
@@ -72,6 +83,7 @@ def evaluate_parameter_setting(
     metrics = compute_metrics(predictions_df)
     state_count = len(model.state_generator.pattern_to_state)
     transition_counts = model.transition_counts_ or {}
+    transition_count = observed_transition_count(transition_counts)
 
     return attach_context_to_record({
         "dataset": dataset_name.upper(),
@@ -81,6 +93,7 @@ def evaluate_parameter_setting(
         "alphabet_size": alphabet_size,
         **metrics,
         "state_count": int(state_count),
+        "transition_count": int(transition_count),
         "transition_sources": int(len(transition_counts)),
         "transition_density": transition_density(transition_counts, state_count),
         "unseen_examples": int(sum(row["status"] == "unseen" for row in score_result["explanations"])),
@@ -103,6 +116,7 @@ def build_parameter_analysis_summary(results_df: pd.DataFrame) -> pd.DataFrame:
         "recall",
         "f1_score",
         "state_count",
+        "transition_count",
         "transition_sources",
         "transition_density",
         "unseen_examples",
@@ -115,13 +129,50 @@ def build_parameter_analysis_summary(results_df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def save_analysis_plots(results_df: pd.DataFrame, analysis_dir: Path) -> None:
+    summary_df = (
+        results_df.groupby(["dataset", "window_size", "alphabet_size"], dropna=False)[
+            ["state_count", "transition_density", "f1_score"]
+        ]
+        .mean()
+        .reset_index()
+    )
+
+    state_count_figure = plot_parameter_sensitivity(
+        summary_df,
+        x="window_size",
+        y="state_count",
+        hue="alphabet_size",
+        title="State Count vs Window Size",
+    )
+    save_figure(state_count_figure, analysis_dir / "state_count_vs_window.png")
+
+    density_figure = plot_parameter_sensitivity(
+        summary_df,
+        x="window_size",
+        y="transition_density",
+        hue="alphabet_size",
+        title="Transition Density vs Window Size",
+    )
+    save_figure(density_figure, analysis_dir / "transition_density_vs_window.png")
+
+    f1_figure = plot_parameter_sensitivity(
+        summary_df,
+        x="window_size",
+        y="f1_score",
+        hue="alphabet_size",
+        title="F1 vs Window Size by Alphabet Size",
+    )
+    save_figure(f1_figure, analysis_dir / "f1_vs_window_alphabet.png")
+
+
 def main() -> None:
     config = load_config(PROJECT_ROOT / "configs" / "config.yaml")
     models_config = load_config(PROJECT_ROOT / "configs" / "models.yaml")
-    experiments_config = load_config(PROJECT_ROOT / "configs" / "experiments.yaml")
     explanations_dir, tables_dir = ensure_output_dirs(config)
+    analysis_dir = ensure_analysis_dir(config)
 
-    parameter_config = experiments_config["experiments"]["parameter_analysis"]
+    parameter_config = config.get("automata_analysis", {})
     window_sizes = parameter_config["window_sizes"]
     alphabet_sizes = parameter_config["alphabet_sizes"]
     rows: list[dict[str, object]] = []
@@ -154,6 +205,8 @@ def main() -> None:
     summary_df = build_parameter_analysis_summary(results_df)
     results_df.to_csv(tables_dir / "parameter_analysis_metrics.csv", index=False)
     summary_df.to_csv(tables_dir / "parameter_analysis_metrics_summary.csv", index=False)
+    results_df.to_csv(analysis_dir / "state_transition_analysis.csv", index=False)
+    save_analysis_plots(results_df, analysis_dir)
     with (explanations_dir / "parameter_analysis_summary.json").open("w", encoding="utf-8") as handle:
         json.dump(
             {

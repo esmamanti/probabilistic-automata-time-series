@@ -38,6 +38,7 @@ def ensure_output_dirs(config: dict) -> tuple[Path, Path]:
 def build_automata_model(models_config: dict) -> ProbabilisticAutomataModel:
     automata_config = models_config["automata"]
     return ProbabilisticAutomataModel(
+        anomaly_threshold=float(automata_config.get("anomaly_threshold", 0.1)),
         paa_window_size=automata_config["paa"]["window_size"],
         alphabet_size=automata_config["sax"]["alphabet_size"],
         pattern_window_size=automata_config["sliding_window"]["size"],
@@ -193,6 +194,7 @@ def build_explanation_frame(
                 "average_log_probability": explanation["average_log_probability"],
                 "confidence_score": explanation["confidence_score"],
                 "decision_reason": explanation["decision_reason"],
+                "rule_based_decision": explanation["decision"],
                 "decision": "anomaly" if predicted_label == 1 else "normal",
                 "decision_score_field": score_field,
                 "decision_score": decision_score,

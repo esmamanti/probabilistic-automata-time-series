@@ -2,11 +2,11 @@ import numpy as np
 import torch
 
 from data.preprocessing.sequence import SequenceDataset
-from experiments.run_deep_models import build_model, get_enabled_deep_models
+from experiments.run_deep_models import build_model, build_trainer, get_enabled_deep_models, resolve_threshold_tuning_config
 from models.deep_learning.cnn_model import CNNModel
 from models.deep_learning.gru_model import GRUModel
 from models.deep_learning.lstm_model import LSTMModel
-from models.deep_learning.trainer import Trainer
+from models.deep_learning.trainer import BinaryFocalLossWithLogits, Trainer
 
 
 def make_sequence_dataset() -> SequenceDataset:
@@ -104,3 +104,67 @@ def test_trainer_fits_and_evaluates_sequence_classifier():
     assert predictions.shape == (4,)
     assert set(predictions.tolist()).issubset({0, 1})
     assert set(metrics) == {"accuracy", "precision", "recall", "f1_score"}
+
+
+def test_resolve_threshold_tuning_config_applies_dataset_floor_override():
+    models_config = {
+        "training": {
+            "threshold_tuning": {
+                "enabled": True,
+                "metric": "f1",
+                "beta": 2.0,
+                "start": 0.01,
+                "end": 0.99,
+                "step": 0.01,
+                "dataset_overrides": {
+                    "SKAB": {"metric": "f1", "min_threshold": 0.10},
+                },
+            }
+        }
+    }
+
+    resolved = resolve_threshold_tuning_config("skab", models_config)
+
+    assert resolved["metric"] == "f1"
+    assert resolved["min_threshold"] == 0.10
+
+
+def test_build_trainer_applies_focal_loss_for_batadal_gru_override():
+    model = GRUModel(input_size=1, hidden_size=4, num_layers=1, dropout=0.0, output_size=1)
+    config = {"project": {"device": "cpu"}}
+    models_config = {
+        "training": {
+            "batch_size": 2,
+            "epochs": 2,
+            "early_stopping": {"enabled": True, "patience": 1, "monitor": "val_f1", "mode": "max"},
+            "class_imbalance": {
+                "use_pos_weight": True,
+                "pos_weight_strategy": "neg_pos_ratio",
+                "loss_name": "bce",
+                "focal_gamma": 2.0,
+                "dataset_model_overrides": [
+                    {"dataset": "BATADAL", "model": "GRU", "loss_name": "focal", "focal_gamma": 1.5}
+                ],
+            },
+            "threshold_tuning": {"enabled": True},
+        },
+        "deep_learning": {
+            "gru": {
+                "architecture": "gru",
+                "input_size": 1,
+                "hidden_size": 4,
+                "num_layers": 1,
+                "dropout": 0.0,
+                "output_size": 1,
+                "learning_rate": 0.01,
+            }
+        },
+    }
+
+    trainer = build_trainer("batadal", "gru", model, config, models_config)
+
+    assert trainer.loss_name == "focal"
+    assert trainer.focal_gamma == 1.5
+    trainer.pos_weight = 2.0
+    trainer.criterion = trainer._build_criterion()
+    assert isinstance(trainer.criterion, BinaryFocalLossWithLogits)

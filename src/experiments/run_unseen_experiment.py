@@ -13,6 +13,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from data.data_module import DataModule, PreparedDataset
+from evaluation.plots import plot_parameter_sensitivity, save_figure
 from evaluation.metrics import aggregate_metrics_frame
 from experiments.run_automata import (
     build_automata_model,
@@ -35,6 +36,12 @@ def ensure_output_dirs(config: dict) -> tuple[Path, Path]:
     explanations_dir.mkdir(parents=True, exist_ok=True)
     tables_dir.mkdir(parents=True, exist_ok=True)
     return explanations_dir, tables_dir
+
+
+def ensure_unseen_dir(config: dict) -> Path:
+    unseen_dir = PROJECT_ROOT / config["paths"]["unseen_results"]
+    unseen_dir.mkdir(parents=True, exist_ok=True)
+    return unseen_dir
 
 
 def derive_pattern_end_indices(
@@ -344,10 +351,77 @@ def build_aggregated_summary(summary_df: pd.DataFrame) -> pd.DataFrame:
     return aggregated.merge(unseen_counts, on=["dataset", "model", "family"], how="left")
 
 
+def build_unseen_pattern_details(explanations_df: pd.DataFrame) -> pd.DataFrame:
+    automata_df = explanations_df[explanations_df["model"] == "AUTOMATA"].copy()
+    if automata_df.empty:
+        return pd.DataFrame(
+            columns=[
+                "dataset",
+                "split",
+                "seed",
+                "original_pattern",
+                "mapped_pattern",
+                "levenshtein_distance",
+                "prediction",
+                "true_label",
+                "is_correct",
+            ]
+        )
+
+    details_df = automata_df.rename(
+        columns={
+            "pattern": "original_pattern",
+            "mapped_to": "mapped_pattern",
+            "distance": "levenshtein_distance",
+            "decision": "prediction",
+        }
+    )
+    details_df["is_correct"] = (details_df["true_label"].astype(int) == details_df["predicted_label"].astype(int)).astype(int)
+    return details_df.loc[
+        :,
+        [
+            "dataset",
+            "split",
+            "seed",
+            "original_pattern",
+            "mapped_pattern",
+            "levenshtein_distance",
+            "prediction",
+            "true_label",
+            "is_correct",
+        ],
+    ]
+
+
+def build_distance_accuracy_frame(details_df: pd.DataFrame) -> pd.DataFrame:
+    if details_df.empty:
+        return pd.DataFrame(columns=["dataset", "levenshtein_distance", "accuracy"])
+    return (
+        details_df.groupby(["dataset", "levenshtein_distance"], dropna=False)["is_correct"]
+        .mean()
+        .reset_index()
+        .rename(columns={"is_correct": "accuracy"})
+    )
+
+
+def save_distance_accuracy_plot(distance_accuracy_df: pd.DataFrame, unseen_dir: Path) -> None:
+    if distance_accuracy_df.empty:
+        return
+    figure = plot_parameter_sensitivity(
+        distance_accuracy_df,
+        x="levenshtein_distance",
+        y="accuracy",
+        hue="dataset",
+        title="Unseen Distance vs Accuracy",
+    )
+    save_figure(figure, unseen_dir / "unseen_distance_accuracy.png")
+
+
 def main() -> None:
     config = load_config(PROJECT_ROOT / "configs" / "config.yaml")
     models_config = load_config(PROJECT_ROOT / "configs" / "models.yaml")
     explanations_dir, tables_dir = ensure_output_dirs(config)
+    unseen_dir = ensure_unseen_dir(config)
     explanation_frames: list[pd.DataFrame] = []
     summary_frames: list[pd.DataFrame] = []
 
@@ -361,10 +435,15 @@ def main() -> None:
     explanations_df = pd.concat(explanation_frames, ignore_index=True)
     summary_df = pd.concat(summary_frames, ignore_index=True)
     aggregated_summary_df = build_aggregated_summary(summary_df)
+    details_df = build_unseen_pattern_details(explanations_df)
+    distance_accuracy_df = build_distance_accuracy_frame(details_df)
 
     explanations_df.to_csv(explanations_dir / "unseen_explanations.csv", index=False)
     summary_df.to_csv(tables_dir / "unseen_metrics.csv", index=False)
     aggregated_summary_df.to_csv(tables_dir / "unseen_metrics_summary.csv", index=False)
+    details_df.to_csv(unseen_dir / "unseen_pattern_details.csv", index=False)
+    distance_accuracy_df.to_csv(unseen_dir / "unseen_distance_accuracy.csv", index=False)
+    save_distance_accuracy_plot(distance_accuracy_df, unseen_dir)
     with (explanations_dir / "unseen_summary.json").open("w", encoding="utf-8") as handle:
         json.dump(
             {

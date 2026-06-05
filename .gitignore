@@ -8,9 +8,44 @@ __pycache__/
 data/processed/
 data/splits/
 
-results/
 logs/
 
 .ipynb_checkpoints/
 
 .DS_Store
+
+.test-figures-*/
+.test-run-all-*/
+
+# Keep report-ready outputs, ignore bulky raw artifacts.
+results/**
+!results/
+!results/automata_analysis/
+!results/automata_analysis/*.csv
+!results/automata_analysis/*.png
+!results/cross_dataset/
+!results/cross_dataset/*.csv
+!results/cross_dataset/*.png
+!results/figures/
+!results/figures/*.png
+!results/improvements/
+!results/improvements/*.csv
+!results/improvements/*.png
+!results/noise/
+!results/noise/*.csv
+!results/noise/*.png
+!results/runtime/
+!results/runtime/*.csv
+!results/runtime/*.png
+!results/tables/
+!results/tables/*.csv
+!results/thresholds/
+!results/thresholds/threshold_tuning_results.csv
+!results/thresholds/probability_distribution.png
+!results/unseen/
+!results/unseen/*.csv
+!results/unseen/*.png
+!results/explanations/
+!results/explanations/automata_explanation_example.json
+!results/explanations/confidence_histogram.png
+!results/explanations/counterfactual_explanations.json

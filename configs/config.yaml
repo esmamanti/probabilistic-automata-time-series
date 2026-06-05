@@ -13,6 +13,13 @@ paths:
   figures: "results/figures"
   tables: "results/tables"
   explanations: "results/explanations"
+  cross_dataset: "results/cross_dataset"
+  automata_analysis: "results/automata_analysis"
+  noise_results: "results/noise"
+  unseen_results: "results/unseen"
+  runtime_results: "results/runtime"
+  thresholds: "results/thresholds"
+  improvements: "results/improvements"
 
 datasets:
 
@@ -70,6 +77,23 @@ noise:
   enabled: true
   gaussian_mean: 0.0
   gaussian_std: 0.05
+
+cross_dataset:
+  enabled: true
+
+noise_levels: [0.05, 0.10, 0.20]
+
+automata_analysis:
+  window_sizes: [3, 4, 5, 6]
+  alphabet_sizes: [3, 4, 5, 6]
+
+runtime_analysis:
+  enabled: true
+
+explainability:
+  save_json: true
+  save_csv: true
+  counterfactual: true
 
 logging:
   save_logs: true

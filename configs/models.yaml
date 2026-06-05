@@ -38,10 +38,38 @@ training:
   early_stopping:
     enabled: true
     patience: 5
+    monitor: "val_f1"
+    mode: "max"
+
+  class_imbalance:
+    use_pos_weight: true
+    pos_weight_strategy: "neg_pos_ratio"
+    loss_name: "bce"
+    focal_gamma: 2.0
+    dataset_model_overrides:
+      - dataset: "BATADAL"
+        model: "GRU"
+        loss_name: "focal"
+        focal_gamma: 2.0
+
+  threshold_tuning:
+    enabled: true
+    metric: "f1"
+    beta: 2.0
+    start: 0.01
+    end: 0.99
+    step: 0.01
+    dataset_overrides:
+      BATADAL:
+        metric: "f2"
+      SKAB:
+        metric: "f1"
+        min_threshold: 0.10
 
   optimizer: "adam"
 
 automata:
+  anomaly_threshold: 0.1
 
   paa:
     window_size: 4
