@@ -193,9 +193,12 @@ def main() -> None:
 
     generated_paths: list[Path] = []
     generated_paths.extend(generate_confusion_and_curve_figures(figures_dir))
-    batadal_threshold_figure = generate_batadal_threshold_figure(figures_dir)
-    if batadal_threshold_figure is not None:
-        generated_paths.append(batadal_threshold_figure)
+    try:
+        batadal_threshold_figure = generate_batadal_threshold_figure(figures_dir)
+        if batadal_threshold_figure is not None:
+            generated_paths.append(batadal_threshold_figure)
+    except FileNotFoundError as error:
+        print(f"Skipping BATADAL threshold figure: {error}")
     generated_paths.extend(generate_automata_figures(figures_dir, config, models_config))
     generated_paths.append(generate_parameter_sensitivity_figure(figures_dir))
 
