@@ -60,7 +60,7 @@ def format_pm(mean_value: object, std_value: object, digits: int = 4) -> str:
     std_numeric = to_float(std_value)
     if pd.isna(mean_numeric) or pd.isna(std_numeric):
         return "N/A"
-    return f"{mean_numeric:.{digits}f} ± {std_numeric:.{digits}f}"
+    return f"{mean_numeric:.{digits}f} +- {std_numeric:.{digits}f}"
 
 
 def normalize_model_name(model_name: object) -> str:
@@ -75,9 +75,9 @@ def choose_preferred_version(frame: pd.DataFrame) -> pd.DataFrame:
     for candidate in PREFERRED_VERSION_ORDER:
         if candidate in available_versions:
             return frame[frame["version"] == candidate].copy()
-    first_version = sorted(available_versions)[0] if available_versions else None
-    if first_version is None:
+    if not available_versions:
         return frame.copy()
+    first_version = sorted(available_versions)[0]
     return frame[frame["version"] == first_version].copy()
 
 
@@ -136,24 +136,23 @@ def build_noise_summary(noise_metrics: pd.DataFrame, unseen_metrics: pd.DataFram
     summary = pd.concat([original, noisy], axis=1).reset_index()
     summary["f1_change"] = summary["noisy_f1"] - summary["original_f1"]
 
-    if unseen_metrics is not None and not unseen_metrics.empty:
-        unseen_frame = unseen_metrics.assign(
-            model=unseen_metrics["model"].map(normalize_model_name),
-            recall=pd.to_numeric(unseen_metrics["recall"], errors="coerce"),
-            accuracy=pd.to_numeric(unseen_metrics["accuracy"], errors="coerce"),
-        )
-        unseen_summary = (
-            unseen_frame.groupby("model", dropna=False)[["recall", "accuracy"]]
-            .mean()
-            .reset_index()
-            .rename(columns={"recall": "unseen_detection_rate", "accuracy": "unseen_mapping_accuracy"})
-        )
-        summary = summary.merge(unseen_summary, on="model", how="left")
-    else:
+    if unseen_metrics is None or unseen_metrics.empty:
         summary["unseen_detection_rate"] = pd.NA
         summary["unseen_mapping_accuracy"] = pd.NA
+        return summary
 
-    return summary
+    unseen_frame = unseen_metrics.assign(
+        model=unseen_metrics["model"].map(normalize_model_name),
+        recall=pd.to_numeric(unseen_metrics["recall"], errors="coerce"),
+        accuracy=pd.to_numeric(unseen_metrics["accuracy"], errors="coerce"),
+    )
+    unseen_summary = (
+        unseen_frame.groupby("model", dropna=False)[["recall", "accuracy"]]
+        .mean()
+        .reset_index()
+        .rename(columns={"recall": "unseen_detection_rate", "accuracy": "unseen_mapping_accuracy"})
+    )
+    return summary.merge(unseen_summary, on="model", how="left")
 
 
 def build_parameter_tables(parameter_metrics: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -176,7 +175,6 @@ def build_parameter_tables(parameter_metrics: pd.DataFrame) -> tuple[pd.DataFram
         .mean()
         .reset_index()
     )
-
     f1_pivot = aggregated.pivot(index="window_size", columns="alphabet_size", values="f1_score")
     state_pivot = aggregated.pivot(index="window_size", columns="alphabet_size", values="state_count")
     density_pivot = aggregated.pivot(index="window_size", columns="alphabet_size", values="transition_density")
@@ -196,14 +194,12 @@ def build_runtime_summary(deep_runtime: pd.DataFrame, automata_runtime: pd.DataF
         dataset=automata_runtime["dataset"].astype(str).str.upper(),
         model=automata_runtime["model"].map(normalize_model_name),
     )
-
     combined = pd.concat([deep_frame, automata_frame], ignore_index=True, sort=False)
-    aggregated = (
+    return (
         combined.groupby(["dataset", "model"], dropna=False)[["training_time_seconds_mean", "inference_time_seconds_mean"]]
         .mean()
         .reset_index()
     )
-    return aggregated
 
 
 def markdown_grid_table(pivot_frame: pd.DataFrame, digits: int = 4) -> list[str]:
@@ -214,8 +210,7 @@ def markdown_grid_table(pivot_frame: pd.DataFrame, digits: int = 4) -> list[str]
     for window_size in GRID_VALUES:
         cells = [str(window_size)]
         for alphabet_size in GRID_VALUES:
-            value = pivot_frame.loc[window_size, alphabet_size]
-            cells.append(format_decimal(value, digits=digits))
+            cells.append(format_decimal(pivot_frame.loc[window_size, alphabet_size], digits=digits))
         lines.append(f"| {' | '.join(cells)} |")
     return lines
 
@@ -230,27 +225,21 @@ def build_report_markdown(
 ) -> str:
     lines: list[str] = [
         "---",
-        "## Proje Notları",
+        "## Proje Notlari",
         "",
         "Bu rapor SKAB ve BATADAL veri setleri uzerinde calismaktadir.",
-        "SWAT ve WADI veri setleri bu projede kullanilmamistir.",
-        'EK sablonundaki SWAT ve WADI sutunlari bu proje icin gecerli degildir;',
-        'ilgili hucreler "N/A" olarak birakilmistir.',
         "---",
         "",
-        "## Tablo 1: Model Performansi ve Stabilitesi (Ortalama F1-score ± Standart Sapma)",
+        "## Tablo 1: Model Performansi ve Stabilitesi (Ortalama F1-score +- Standart Sapma)",
         "",
-        "| Model    | SKAB            | BATADAL         | SWAT | WADI |",
-        "|----------|-----------------|-----------------|------|------|",
+        "| Model    | SKAB            | BATADAL         |",
+        "|----------|-----------------|-----------------|",
     ]
 
     for model_name in MODEL_ORDER:
         skab_mean, skab_std = performance_lookup.get(("SKAB", model_name), (float("nan"), float("nan")))
         batadal_mean, batadal_std = performance_lookup.get(("BATADAL", model_name), (float("nan"), float("nan")))
-        lines.append(
-            f"| {MODEL_LABELS[model_name]} | {format_pm(skab_mean, skab_std)} | "
-            f"{format_pm(batadal_mean, batadal_std)} | N/A  | N/A  |"
-        )
+        lines.append(f"| {MODEL_LABELS[model_name]} | {format_pm(skab_mean, skab_std)} | {format_pm(batadal_mean, batadal_std)} |")
 
     lines.extend(
         [
@@ -265,10 +254,7 @@ def build_report_markdown(
         ]
     )
 
-    noise_lookup = {
-        normalize_model_name(row["model"]): row
-        for row in noise_summary.to_dict(orient="records")
-    }
+    noise_lookup = {normalize_model_name(row["model"]): row for row in noise_summary.to_dict(orient="records")}
     for model_name in MODEL_ORDER:
         row = noise_lookup.get(model_name, {})
         lines.append(
@@ -280,11 +266,11 @@ def build_report_markdown(
     lines.extend(
         [
             "",
-            "## Tablo 4a: Automata Parametre Duyarlilik Analizi — F1-score (BATADAL)",
+            "## Tablo 4a: Automata Parametre Duyarlilik Analizi - F1-score (BATADAL)",
             "",
             *markdown_grid_table(f1_table),
             "",
-            "## Tablo 4b: Automata Parametre Duyarlilik Analizi — State Sayisi",
+            "## Tablo 4b: Automata Parametre Duyarlilik Analizi - State Sayisi",
             "",
             *markdown_grid_table(state_table),
             "",

@@ -1,20 +1,17 @@
 ---
-## Proje Notları
+## Proje Notlari
 
 Bu rapor SKAB ve BATADAL veri setleri uzerinde calismaktadir.
-SWAT ve WADI veri setleri bu projede kullanilmamistir.
-EK sablonundaki SWAT ve WADI sutunlari bu proje icin gecerli degildir;
-ilgili hucreler "N/A" olarak birakilmistir.
 ---
 
-## Tablo 1: Model Performansi ve Stabilitesi (Ortalama F1-score ± Standart Sapma)
+## Tablo 1: Model Performansi ve Stabilitesi (Ortalama F1-score +- Standart Sapma)
 
-| Model    | SKAB            | BATADAL         | SWAT | WADI |
-|----------|-----------------|-----------------|------|------|
-| LSTM | 0.5021 ± 0.0381 | 0.1086 ± 0.0308 | N/A  | N/A  |
-| GRU | 0.4978 ± 0.0334 | 0.1880 ± 0.0147 | N/A  | N/A  |
-| 1D-CNN | 0.4912 ± 0.0573 | 0.1630 ± 0.0148 | N/A  | N/A  |
-| Automata | 0.5022 ± 0.0666 | 0.3053 ± 0.0000 | N/A  | N/A  |
+| Model    | SKAB            | BATADAL         |
+|----------|-----------------|-----------------|
+| LSTM | 0.8219 +- 0.0375 | 0.1086 +- 0.0308 |
+| GRU | 0.8355 +- 0.0276 | 0.1880 +- 0.0147 |
+| 1D-CNN | 0.8273 +- 0.0379 | 0.1630 +- 0.0148 |
+| Automata | 0.5022 +- 0.0666 | 0.3053 +- 0.0000 |
 
 *5 farkli random seed [42, 123, 2026, 7, 999] ile elde edilen ortalama ve standart sapma.
 SKAB icin GroupKFold (k=5) fold ortalamasi alinmistir.*
@@ -28,7 +25,7 @@ SKAB icin GroupKFold (k=5) fold ortalamasi alinmistir.*
 | 1D-CNN | 0.2324 | 0.2328 | 0.0003 | 0.0000 | 0.8794 |
 | Automata | 0.1150 | 0.1167 | 0.0017 | 0.1739 | 0.4133 |
 
-## Tablo 4a: Automata Parametre Duyarlilik Analizi — F1-score (BATADAL)
+## Tablo 4a: Automata Parametre Duyarlilik Analizi - F1-score (BATADAL)
 
 | Window Size \ Alphabet Size | 3 | 4 | 5 | 6 |
 |-----------------------------|---|---|---|---|
@@ -37,7 +34,7 @@ SKAB icin GroupKFold (k=5) fold ortalamasi alinmistir.*
 | 5 | 0.0548 | 0.2957 | 0.2545 | 0.2727 |
 | 6 | 0.3889 | 0.3265 | 0.3226 | 0.3205 |
 
-## Tablo 4b: Automata Parametre Duyarlilik Analizi — State Sayisi
+## Tablo 4b: Automata Parametre Duyarlilik Analizi - State Sayisi
 
 | Window Size \ Alphabet Size | 3 | 4 | 5 | 6 |
 |-----------------------------|---|---|---|---|
@@ -62,7 +59,7 @@ Gecis yogunlugu = toplam gecis sayisi / (state sayisi ^ 2)
 
 | Model    | SKAB Egitim (sn) | SKAB Inference (sn) | BATADAL Egitim (sn) | BATADAL Inference (sn) |
 |----------|------------------|---------------------|---------------------|------------------------|
-| LSTM | 10.1155 | 0.1194 | 2.7770 | 0.0241 |
-| GRU | 8.7268 | 0.1146 | 3.2575 | 0.0236 |
-| 1D-CNN | 9.9035 | 0.0933 | 5.2977 | 0.0164 |
+| LSTM | 10.7194 | 0.1125 | 2.8550 | 0.0194 |
+| GRU | 8.5443 | 0.1043 | 3.6737 | 0.0167 |
+| 1D-CNN | 8.2600 | 0.0948 | 6.0975 | 0.0155 |
 | Automata | 26.0647 | 0.0085 | 0.5297 | 0.0046 |

@@ -66,11 +66,11 @@ def get_primary_deep_model_name(models_config: dict) -> str:
     return get_enabled_deep_models(models_config)[0].upper()
 
 
-def build_model(model_name: str, model_config: dict):
+def build_model(model_name: str, model_config: dict, input_feature_count: int):
     architecture = str(model_config.get("architecture", model_name)).lower()
     if architecture == "lstm":
         return LSTMModel(
-            input_size=model_config["input_size"],
+            input_size=input_feature_count,
             hidden_size=model_config["hidden_size"],
             num_layers=model_config["num_layers"],
             dropout=model_config["dropout"],
@@ -78,7 +78,7 @@ def build_model(model_name: str, model_config: dict):
         )
     if architecture == "gru":
         return GRUModel(
-            input_size=model_config["input_size"],
+            input_size=input_feature_count,
             hidden_size=model_config["hidden_size"],
             num_layers=model_config["num_layers"],
             dropout=model_config["dropout"],
@@ -86,7 +86,7 @@ def build_model(model_name: str, model_config: dict):
         )
     if architecture == "cnn":
         return CNNModel(
-            input_channels=model_config["input_channels"],
+            input_channels=input_feature_count,
             num_filters=model_config["num_filters"],
             kernel_size=model_config["kernel_size"],
             dropout=model_config["dropout"],
@@ -101,18 +101,20 @@ def build_trainer(dataset_name: str, model_name: str, model, config: dict, model
     class_imbalance_config = training_config.get("class_imbalance", {})
     dataset_key = str(dataset_name).upper()
     model_key = str(model_name).upper()
-    loss_config = {
+    resolved_class_imbalance_config = {
+        "use_pos_weight": bool(class_imbalance_config.get("use_pos_weight", False)),
+        "pos_weight_strategy": str(class_imbalance_config.get("pos_weight_strategy", "neg_pos_ratio")),
         "loss_name": str(class_imbalance_config.get("loss_name", "bce")),
         "focal_gamma": float(class_imbalance_config.get("focal_gamma", 2.0)),
     }
+    dataset_override = class_imbalance_config.get("dataset_overrides", {}).get(dataset_key, {})
+    for key, value in dataset_override.items():
+        resolved_class_imbalance_config[key] = value
     for override in class_imbalance_config.get("dataset_model_overrides", []):
         if str(override.get("dataset", "")).upper() == dataset_key and str(override.get("model", "")).upper() == model_key:
-            loss_config.update(
-                {
-                    "loss_name": str(override.get("loss_name", loss_config["loss_name"])),
-                    "focal_gamma": float(override.get("focal_gamma", loss_config["focal_gamma"])),
-                }
-            )
+            for key, value in override.items():
+                if key not in {"dataset", "model"}:
+                    resolved_class_imbalance_config[key] = value
     early_stopping_config = training_config["early_stopping"]
     return Trainer(
         model=model,
@@ -124,10 +126,10 @@ def build_trainer(dataset_name: str, model_name: str, model, config: dict, model
         early_stopping_patience=int(early_stopping_config["patience"]),
         early_stopping_monitor=str(early_stopping_config.get("monitor", "val_loss")),
         early_stopping_mode=str(early_stopping_config.get("mode", "min")),
-        use_pos_weight=bool(class_imbalance_config.get("use_pos_weight", False)),
-        pos_weight_strategy=str(class_imbalance_config.get("pos_weight_strategy", "neg_pos_ratio")),
-        loss_name=loss_config["loss_name"],
-        focal_gamma=float(loss_config["focal_gamma"]),
+        use_pos_weight=bool(resolved_class_imbalance_config.get("use_pos_weight", False)),
+        pos_weight_strategy=str(resolved_class_imbalance_config.get("pos_weight_strategy", "neg_pos_ratio")),
+        loss_name=str(resolved_class_imbalance_config["loss_name"]),
+        focal_gamma=float(resolved_class_imbalance_config["focal_gamma"]),
     )
 
 
@@ -278,7 +280,8 @@ def train_and_evaluate_model(
     seed: int,
 ) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, float], dict[str, float], dict[str, object], dict[str, object], dict[str, object], pd.DataFrame]:
     split_name = prepared_dataset.evaluation_split or "test"
-    model = build_model(model_name, models_config["deep_learning"][model_name])
+    input_feature_count = int(prepared_dataset.splits["train"].features.shape[1])
+    model = build_model(model_name, models_config["deep_learning"][model_name], input_feature_count)
     trainer = build_trainer(dataset_name, model_name, model, config, models_config)
     ratio_summary = summarize_ratios(prepared_dataset)
     training_started_at = perf_counter()

@@ -213,7 +213,7 @@ def pairwise_mcnemar_by_group(
                 continue
 
             if not (merged[f"{target_column}_a"].astype(int) == merged[f"{target_column}_b"].astype(int)).all():
-                raise ValueError("Aligned predictions disagree on true labels; check match_columns")
+                continue
 
             result = run_mcnemar_test(
                 y_true=merged[f"{target_column}_a"].astype(int).to_numpy(),

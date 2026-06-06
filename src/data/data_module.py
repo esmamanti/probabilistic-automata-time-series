@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -43,9 +44,23 @@ class DataModule:
     def __init__(self, config: dict):
         self.config = config
         self.paths = config["paths"]
-        self.preprocessing_config = config["preprocessing"]
-        self.sequence_length = self.preprocessing_config.get("sequence_length", 16)
-        self.sequence_stride = self.preprocessing_config.get("sequence_stride", 1)
+        self.global_preprocessing_config = config["preprocessing"]
+
+    def _resolve_preprocessing_config(self, dataset_name: str) -> tuple[dict, int, int]:
+        preprocessing_config = deepcopy(self.global_preprocessing_config)
+        dataset_override = preprocessing_config.get("dataset_overrides", {}).get(dataset_name.upper(), {})
+
+        for key, value in dataset_override.items():
+            if isinstance(value, dict) and isinstance(preprocessing_config.get(key), dict):
+                merged_value = deepcopy(preprocessing_config[key])
+                merged_value.update(value)
+                preprocessing_config[key] = merged_value
+            else:
+                preprocessing_config[key] = value
+
+        sequence_length = int(preprocessing_config.get("sequence_length", 16))
+        sequence_stride = int(preprocessing_config.get("sequence_stride", 1))
+        return preprocessing_config, sequence_length, sequence_stride
 
     def prepare_dataset(self, dataset_name: str, scenario: str = "original") -> PreparedDataset:
         dataset_name = dataset_name.lower()
@@ -177,7 +192,8 @@ class DataModule:
         split_column: str | None,
         evaluation_split: str | None = None,
     ) -> PreparedDataset:
-        pipeline = PreprocessingPipeline(self.preprocessing_config)
+        preprocessing_config, sequence_length, sequence_stride = self._resolve_preprocessing_config(dataset_name)
+        pipeline = PreprocessingPipeline(preprocessing_config)
 
         train_features, train_target = split_features_and_target(raw_splits["train"], feature_columns, target_column)
         train_features = pipeline.fit_transform(train_features).reset_index(drop=True)
@@ -189,8 +205,8 @@ class DataModule:
                 sequences=generate_sequences(
                     train_features,
                     train_target.reset_index(drop=True),
-                    sequence_length=self.sequence_length,
-                    stride=self.sequence_stride,
+                    sequence_length=sequence_length,
+                    stride=sequence_stride,
                 ),
             )
         }
@@ -217,8 +233,8 @@ class DataModule:
                 sequences=generate_sequences(
                     transformed_features,
                     split_target.reset_index(drop=True),
-                    sequence_length=self.sequence_length,
-                    stride=self.sequence_stride,
+                    sequence_length=sequence_length,
+                    stride=sequence_stride,
                 ),
             )
 

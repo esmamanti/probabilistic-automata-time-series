@@ -72,6 +72,11 @@ preprocessing:
 
   sequence_length: 16
   sequence_stride: 1
+  dataset_overrides:
+    SKAB:
+      pca:
+        enabled: false
+      sequence_length: 32
 
 noise:
   enabled: true

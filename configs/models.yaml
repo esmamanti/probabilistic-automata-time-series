@@ -46,6 +46,9 @@ training:
     pos_weight_strategy: "neg_pos_ratio"
     loss_name: "bce"
     focal_gamma: 2.0
+    dataset_overrides:
+      SKAB:
+        use_pos_weight: false
     dataset_model_overrides:
       - dataset: "BATADAL"
         model: "GRU"
