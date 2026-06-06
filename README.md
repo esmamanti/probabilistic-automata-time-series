@@ -1,31 +1,31 @@
 # Probabilistic Automata ile Zaman Serisi Anomali Tespiti
 
-Bu proje, zaman serisi anomali tespitinde olasılıksal otomata tabanlı sembolik bir yaklaşımı derin öğrenme tabanlı modellerle karşılaştırmak için geliştirilmiştir. Çalışmada hem tahmin başarımı hem de açıklanabilirlik, gürültü dayanıklılığı, unseen pattern yönetimi, çapraz veri seti aktarımı ve çalışma süresi gibi ölçütler birlikte ele alınmaktadır. Repo, deneylerin yeniden üretilebilir biçimde çalıştırılmasını ve tüm ara çıktılarının kaydedilmesini hedefleyen tam bir deney hattı içerir.
+Bu proje, zaman serisi anomali tespitinde olasiliksal otomata tabanli sembolik bir yaklasimi derin ogrenme tabanli modellerle karsilastirmak icin gelistirilmistir. Calismada hem tahmin basarimi hem de aciklanabilirlik, gurultu dayanikliligi, unseen pattern yonetimi, capraz veri seti aktarimi ve calisma suresi gibi olcutler birlikte ele alinmaktadir. Repo, deneylerin yeniden uretilebilir bicimde calistirilmasini ve tum ara ciktilarinin kaydedilmesini hedefleyen tam bir deney hatti icerir.
 
 ## Veri Setleri
 
-Bu çalışmada iki veri seti kullanılmıştır:
+Bu calismada iki veri seti kullanilmistir:
 
-- `SKAB`: Endüstriyel ekipman sensörlerinden türetilen anomali senaryoları içerir. Bu projede yalnızca `valve1` ve `valve2` klasörleri kullanılmıştır.
-- `BATADAL`: Su dağıtım sistemi saldırı/anomali senaryolarını içerir. Bu projede `BATADAL_dataset04.csv` dosyası kullanılmış ve hedef etiket kolonu `ATT_FLAG` olarak işlenmiştir.
+- `SKAB`: Endustriyel ekipman sensorlerinden turetilen anomali senaryolari icerir. Bu projede yalnizca `valve1` ve `valve2` klasorleri kullanilmistir.
+- `BATADAL`: Su dagitim sistemi saldiri/anomali senaryolarini icerir. Bu projede `BATADAL_dataset04.csv` dosyasi kullanilmis ve hedef etiket kolonu `ATT_FLAG` olarak islenmistir.
 
-Bu iki veri seti birlikte seçilmiştir çünkü biri fold-tabanlı grup ayrımı gerektiren daha parçalı bir yapı sunarken, diğeri zaman sıralı ve sınıf dengesizliği yüksek bir gerçekçi değerlendirme ortamı sağlar. EK PDF şablonunda geçen `SWAT` ve `WADI` veri setlerinden farklı olarak bu repo yalnızca `SKAB` ve `BATADAL` üzerine kuruludur.
+Bu iki veri seti birlikte secilmistir cunku biri fold-tabanli grup ayrimi gerektiren daha parcali bir yapi sunarken, digeri zaman sirali ve sinif dengesizligi yuksek bir gercekci degerlendirme ortami saglar. EK PDF sablonunda gecen `SWAT` ve `WADI` veri setlerinden farkli olarak bu repo yalnizca `SKAB` ve `BATADAL` uzerine kuruludur.
 
-## Kurulum ve Çalıştırma
+## Kurulum ve Calistirma
 
-Bağımlılıkları kurmak için:
+Bagimliliklari kurmak icin:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Tüm deney hattını çalıştırmak için:
+Tum deney hattini calistirmak icin:
 
 ```bash
 python src/experiments/run_all.py --no-resume
 ```
 
-İsterseniz aşama bazlı komutlar da doğrudan çalıştırılabilir:
+Isterseniz asama bazli komutlar da dogrudan calistirilabilir:
 
 ```bash
 python src/experiments/run_automata.py
@@ -42,20 +42,20 @@ python src/experiments/generate_figures.py
 
 ## Proje Mimarisi
 
-Repo yapısı özetle aşağıdaki bölümlerden oluşur:
+Repo yapisi ozetle asagidaki bolumlerden olusur:
 
-- `configs/`: Veri seti, model ve deney ayarlarını içeren YAML dosyaları.
-- `data/`: Ham, işlenmiş ve bölünmüş veri çıktıları.
-- `src/data/`: Veri yükleme, dönüştürme ve split hazırlama bileşenleri.
-- `src/models/`: Olasılıksal otomata ve derin öğrenme modellerinin uygulamaları.
-- `src/evaluation/`: Metrikler, grafik üretimi ve istatistiksel test yardımcıları.
-- `src/experiments/`: Tüm deney scriptleri ve tam pipeline akışı.
-- `src/utils/`: Config, seed, deney context’i ve yardımcı altyapı kodları.
-- `results/`: Tablolar, açıklanabilirlik çıktıları, görseller, runtime ve diğer deney artefact’ları.
-- `tests/`: Birim testler ve kabul testi niteliğindeki doğrulamalar.
-- `reports/`: README içine taşınmış rapor yapısının eski yardımcı kalıntıları.
+- `configs/`: Veri seti, model ve deney ayarlarini iceren YAML dosyalari.
+- `data/`: Ham, islenmis ve bolunmus veri ciktilari.
+- `src/data/`: Veri yukleme, donusturme ve split hazirlama bilesenleri.
+- `src/models/`: Olasiliksal otomata ve derin ogrenme modellerinin uygulamalari.
+- `src/evaluation/`: Metrikler, grafik uretimi ve istatistiksel test yardimcilari.
+- `src/experiments/`: Tum deney scriptleri ve tam pipeline akisi.
+- `src/utils/`: Config, seed, deney context'i ve yardimci altyapi kodlari.
+- `results/`: Tablolar, aciklanabilirlik ciktilari, gorseller, runtime ve diger deney artefact'lari.
+- `tests/`: Birim testler ve kabul testi niteligindeki dogrulamalar.
+- `reports/`: README icine tasinmis rapor yapisinin eski yardimci kalintilari.
 
-Merkezi giriş noktaları:
+Merkezi giris noktalari:
 
 - `configs/config.yaml`
 - `configs/models.yaml`
@@ -63,219 +63,229 @@ Merkezi giriş noktaları:
 - `src/experiments/run_all.py`
 - `src/utils/experiment_context.py`
 
-**Not — CSV Deney Kaydı Formatı:** `results/tables/` altındaki ham CSV dosyaları her satırda tam deney context’ini JSON string olarak içerir (`context_` önekli kolonlar). Bu tasarım tam yeniden üretilebilirlik için seçilmiştir; her satır hangi parametrelerle üretildiğini kendi içinde taşır. Raporlama sırasında yalnızca `dataset`, `model`, `split`, `f1_score_mean`, `f1_score_std` gibi özet kolonlar kullanılır. Özet tablolar ayrıca `*_summary.csv` uzantısıyla kaydedilir.
+**Not - CSV Deney Kaydi Formati:** `results/tables/` altindaki ham CSV dosyalari her satirda tam deney context'ini JSON string olarak icerir (`context_` onekli kolonlar). Bu tasarim tam yeniden uretilebilirlik icin secilmistir; her satir hangi parametrelerle uretildigini kendi icinde tasir. Raporlama sirasinda yalnizca `dataset`, `model`, `split`, `f1_score_mean`, `f1_score_std` gibi ozet kolonlar kullanilir. Ozet tablolar ayrica `*_summary.csv` uzantisiyla kaydedilir.
 
-## Veri Ön İşleme ve Bölme Stratejisi
+## Veri On Isleme ve Bolme Stratejisi
 
-Ön işleme hattı eksik değer işleme, ölçekleme, PCA ile tek bileşene indirgeme ve sabit uzunluklu dizi üretiminden oluşur.
+On isleme hatti eksik deger isleme, olcekleme, PCA ile tek bilesene indirgeme ve sabit uzunluklu dizi uretiminden olusur.
 
-`SKAB` için:
+`SKAB` icin:
 
-- Veri yalnızca `valve1` ve `valve2` klasörlerinden alınır.
-- Tüm CSV dosyaları birleştirilir.
-- `source_group` ve `source_file` alanları izlenebilirlik için korunur.
-- Değerlendirme `source_file` bazlı grup ayrımı mantığıyla fold yapısında yürütülür.
+- Veri yalnizca `valve1` ve `valve2` klasorlerinden alinir.
+- Tum CSV dosyalari birlestirilir.
+- `source_group` ve `source_file` alanlari izlenebilirlik icin korunur.
+- Degerlendirme `source_file` bazli grup ayrimi mantigiyla fold yapisinda yurutulur.
 
-`BATADAL` için:
+`BATADAL` icin:
 
-- `BATADAL_dataset04.csv` kullanılır.
-- Etiket kolonu `ATT_FLAG` olarak sabitlenmiştir.
-- Zaman sırası korunur.
-- Bölme stratejisi `%60 train / %20 validation / %20 test` şeklindedir.
+- `BATADAL_dataset04.csv` kullanilir.
+- Etiket kolonu `ATT_FLAG` olarak sabitlenmistir.
+- Zaman sirasi korunur.
+- Bolme stratejisi `%60 train / %20 validation / %20 test` seklindedir.
 
-Data leakage’i engellemek için şu kurallar uygulanır:
+Data leakage'i engellemek icin su kurallar uygulanir:
 
-- scaler yalnızca train verisi üzerinde fit edilir
-- PCA yalnızca train verisi üzerinde fit edilir
-- validation ve test bölümlerinde aynı fit edilmiş dönüşümler tekrar kullanılır
-- otomata durum üretimi ve geçiş olasılıkları yalnızca train verisinden kurulur
+- scaler yalnizca train verisi uzerinde fit edilir
+- PCA yalnizca train verisi uzerinde fit edilir
+- validation ve test bolumlerinde ayni fit edilmis donusumler tekrar kullanilir
+- otomata durum uretimi ve gecis olasiliklari yalnizca train verisinden kurulur
 
-## Eğitim Protokolü
+## Egitim Protokolu
 
-Çalışmanın temel eğitim standardı aşağıdaki gibidir:
+Calismanin temel egitim standardi asagidaki gibidir:
 
-- early stopping metriği: `val_loss`
+- early stopping metrigi: `val_loss`
 - maksimum epoch: `50`
 - batch size: `32`
-- random seed kümesi: `[42, 123, 2026, 7, 999]`
+- random seed kumesi: `[42, 123, 2026, 7, 999]`
 
-Karşılaştırılan başlıca model aileleri:
+Karsilastirilan baslica model aileleri:
 
-- Olasılıksal otomata tabanlı sembolik model
+- Olasiliksal otomata tabanli sembolik model
 - `LSTM`
 - `GRU`
 - `CNN`
 
-Ek iyileştirme olarak derin öğrenme modellerinde iki rapor destek özelliği de bulunmaktadır:
+Ek iyilestirme olarak derin ogrenme modellerinde iki rapor destek ozelligi de bulunmaktadir:
 
-- validation tabanlı threshold tuning
-- class imbalance azaltmak için weighted BCE loss
+- validation tabanli threshold tuning
+- class imbalance azaltmak icin weighted BCE loss
 
-Bu iki mekanizma deneyleri zenginleştiren ek özelliklerdir; temel mimari karşılaştırmanın zorunlu tek koşulu değildir.
+Bu iki mekanizma deneyleri zenginlestiren ek ozelliklerdir; temel mimari karsilastirmanin zorunlu tek kosulu degildir.
 
-## Tablo 1 — Model Performansı
+## Deneysel Sonuclar
 
-| Model | SKAB (F1 ± std) | BATADAL (F1 ± std) |
-|-------|-----------------|---------------------|
-| LSTM | 0.4942 ± 0.0539 | 0.1297 ± 0.0412 |
-| GRU | 0.4979 ± 0.0468 | 0.1766 ± 0.0509 |
-| 1D-CNN | 0.4965 ± 0.0774 | 0.0737 ± 0.0466 |
-| Automata | 0.5022 ± 0.0934 | 0.3053 ± 0.0000 |
+## Proje Notlari
 
-SKAB sonuçları 5-fold StratifiedGroupKFold ortalamasıdır (`source_file` bazlı gruplama). BATADAL sonuçları zaman sıralı test kümesinde 5 seed ortalamasıdır `[42, 123, 2026, 7, 999]`. BATADAL'da düşük DL F1 değerleri sınıf dengesizliğinden kaynaklanmaktadır (`~%5` anomali oranı).
+Bu rapor SKAB ve BATADAL veri setleri uzerinde calismaktadir.
+SWAT ve WADI veri setleri bu projede kullanilmamistir.
+EK sablonundaki SWAT ve WADI sutunlari bu proje icin gecerli degildir;
+ilgili hucreler "N/A" olarak birakilmistir.
 
-## Tablo 2 — Gürültü ve Unseen Analizi
+## Tablo 1: Model Performansi ve Stabilitesi (Ortalama F1-score +- Standart Sapma)
 
-| Model | SKAB Orig. F1 | SKAB Gürültülü F1 | BAT Orig. F1 | BAT Gürültülü F1 | Det. Rate | Map. Acc. |
-|-------|---------------|-------------------|--------------|------------------|-----------|-----------|
-| LSTM | 0.2632 | 0.2642 | 0.0000 | 0.0000 | N/A | N/A |
-| GRU | 0.2717 | 0.2709 | 0.0334 | 0.0329 | N/A | N/A |
-| CNN | 0.2789 | 0.2790 | 0.0000 | 0.0000 | N/A | N/A |
-| Automata | 0.0816 | 0.0852 | 0.2821 | 0.2677 | SKAB: 100.0% / BAT: 0.0% | SKAB: 0.3352 / BAT: 0.5556 |
+| Model    | SKAB            | BATADAL         | SWAT | WADI |
+|----------|-----------------|-----------------|------|------|
+| LSTM | 0.5021 +- 0.0381 | 0.1086 +- 0.0308 | N/A  | N/A  |
+| GRU | 0.4978 +- 0.0334 | 0.1880 +- 0.0147 | N/A  | N/A  |
+| 1D-CNN | 0.4912 +- 0.0573 | 0.1630 +- 0.0148 | N/A  | N/A  |
+| Automata | 0.5022 +- 0.0666 | 0.3053 +- 0.0000 | N/A  | N/A  |
 
-Det. Rate ve Map. Acc. yalnızca Automata için hesaplanmıştır. Gürültü seviyesi: Gaussian `std=0.10`.
+*5 farkli random seed [42, 123, 2026, 7, 999] ile elde edilen ortalama ve standart sapma.
+SKAB icin GroupKFold (k=5) fold ortalamasi alinmistir.*
 
-## Tablo 3 — Cross-Dataset Matrisi
+## Tablo 2: Gurultu Etkisi ve Unseen Senaryo Analizi
 
-| Train / Test | SKAB | BATADAL |
-|-------------|------|---------|
-| Train: SKAB | — (in-distribution, bkz. Tablo 1) | 0.3125 ± 0.0299 (1D-CNN) |
-| Train: BATADAL | 0.5372 ± 0.0127 (Automata) | — (in-distribution, bkz. Tablo 1) |
+| Model    | Orijinal F1 | Gurultulu F1 | F1 Degisimi | Unseen Det. Rate | Unseen Map. Acc. |
+|----------|-------------|--------------|-------------|------------------|------------------|
+| LSTM | 0.2193 | 0.2200 | 0.0007 | 0.0000 | 0.8794 |
+| GRU | 0.2319 | 0.2316 | -0.0003 | 0.0000 | 0.8794 |
+| 1D-CNN | 0.2324 | 0.2328 | 0.0003 | 0.0000 | 0.8794 |
+| Automata | 0.1150 | 0.1167 | 0.0017 | 0.1739 | 0.4133 |
 
-Cross-dataset deneylerde tüm özellikler PCA ile `PC1`'e indirgenerek boyut uyumu sağlanmıştır. BATADAL→SKAB: Automata modeli `recall=1.0` üretiyor ancak precision düşük; bu durum anomali oranı yüksek sınıfa karşı aşırı hassasiyetle açıklanabilir.
+## Tablo 4a: Automata Parametre Duyarlilik Analizi - F1-score (BATADAL)
 
-## Tablo 4 — Parametre Analizi
+| Window Size \ Alphabet Size | 3 | 4 | 5 | 6 |
+|-----------------------------|---|---|---|---|
+| 3 | 0.2500 | 0.1591 | 0.1778 | 0.1757 |
+| 4 | 0.2821 | 0.3065 | 0.2353 | 0.2584 |
+| 5 | 0.0548 | 0.2957 | 0.2545 | 0.2727 |
+| 6 | 0.3889 | 0.3265 | 0.3226 | 0.3205 |
 
-### Tablo 4a — Window Size Etkisi (`alphabet_size=3` sabit)
+## Tablo 4b: Automata Parametre Duyarlilik Analizi - State Sayisi
 
-| Window Size | SKAB F1 | BAT F1 | SKAB State # | BAT State # |
-|-------------|---------|--------|--------------|-------------|
-| 3 | 0.0859 | 0.2500 | 20.68 | 26.00 |
-| 4 | 0.0816 | 0.2821 | 37.92 | 76.00 |
-| 5 | 0.0844 | 0.0548 | 67.92 | 166.00 |
-| 6 | 0.0909 | 0.3889 | 116.12 | 206.00 |
+| Window Size \ Alphabet Size | 3 | 4 | 5 | 6 |
+|-----------------------------|---|---|---|---|
+| 3 | 26.0000 | 59.0000 | 112.0000 | 178.0000 |
+| 4 | 76.0000 | 175.0000 | 258.0000 | 340.0000 |
+| 5 | 166.0000 | 298.0000 | 368.0000 | 421.0000 |
+| 6 | 206.0000 | 304.0000 | 342.0000 | 378.0000 |
 
-### Tablo 4b — Alphabet Size Etkisi (`window_size=4` sabit)
+## Tablo 4c: Gecis Yogunlugu (Transition Density)
 
-| Alphabet Size | SKAB F1 | BAT F1 | SKAB State # | BAT State # |
-|---------------|---------|--------|--------------|-------------|
-| 3 | 0.0816 | 0.2821 | 37.92 | 76.00 |
-| 4 | 0.0969 | 0.3065 | 62.96 | 175.00 |
-| 5 | 0.1144 | 0.2353 | 97.40 | 258.00 |
-| 6 | 0.1124 | 0.2584 | 137.40 | 340.00 |
+Gecis yogunlugu = toplam gecis sayisi / (state sayisi ^ 2)
+(Her parametre kombinasyonu icin hesaplandi)
 
-Window size artışı state sayısını artırır, daha az unseen pattern üretir ama geçiş matrisini seyrekleştirir. Alphabet size artışı sembol uzayını genişletir, unseen pattern riskini artırır. Bu iki etki arasındaki denge optimal parametre seçimini belirler.
+| Window Size \ Alphabet Size | 3 | 4 | 5 | 6 |
+|-----------------------------|---|---|---|---|
+| 3 | 0.1050 | 0.0500 | 0.0244 | 0.0147 |
+| 4 | 0.0261 | 0.0095 | 0.0059 | 0.0040 |
+| 5 | 0.0092 | 0.0042 | 0.0031 | 0.0026 |
+| 6 | 0.0063 | 0.0038 | 0.0032 | 0.0028 |
 
-## Tablo 5 — Runtime
+> **Gecis Yogunlugu (Transition Density):** Toplam gecis sayisinin
+> state sayisinin karesine oranidir. Yogunlugun dusuk olmasi,
+> otomatanin seyrek bir gecis grafigine sahip oldugunu ve
+> egitimde gorulmemis gecis ciftlerinin fazla oldugunu gosterir.
 
-| Model | SKAB Eğitim (sn) | SKAB Çıkarım (sn) | BAT Eğitim (sn) | BAT Çıkarım (sn) |
-|-------|------------------|-------------------|-----------------|------------------|
-| LSTM | 9.68 | 0.1026 | 2.79 | 0.0196 |
-| GRU | 8.69 | 0.0984 | 2.97 | 0.0193 |
-| CNN | 11.49 | 0.0807 | 6.22 | 0.0136 |
-| Automata | 26.06 | 0.0085 | 0.53 | 0.0046 |
+## Tablo 5: Modellerin Calisma Suresi
 
-Eğitim süresi GPU (CUDA) üzerinde ölçülmüştür. Automata modeli CPU'da dahi DL modellerine kıyasla çok daha kısa eğitim süresine sahiptir.
+| Model    | SKAB Egitim (sn) | SKAB Inference (sn) | BATADAL Egitim (sn) | BATADAL Inference (sn) |
+|----------|------------------|---------------------|---------------------|------------------------|
+| LSTM | 10.1155 | 0.1194 | 2.7770 | 0.0241 |
+| GRU | 8.7268 | 0.1146 | 3.2575 | 0.0236 |
+| 1D-CNN | 9.9035 | 0.0933 | 5.2977 | 0.0164 |
+| Automata | 26.0647 | 0.0085 | 0.5297 | 0.0046 |
 
-## Görseller
+## Gorseller
 
-### Şekil 1: En iyi F1 üreten modelin confusion matrix'i
-![En iyi F1 üreten modelin confusion matrix'i](results/figures/confusion_matrix_best_model.png)
-*En iyi F1 üreten modelin confusion matrix'i.*
+### Sekil 1: En iyi F1 ureten modelin confusion matrix'i
+![En iyi F1 ureten modelin confusion matrix'i](results/figures/confusion_matrix_best_model.png)
+*En iyi F1 ureten modelin confusion matrix'i.*
 
-### Şekil 2: Model ailelerinin ROC eğrisi karşılaştırması
-![Model ailelerinin ROC eğrisi karşılaştırması](results/figures/roc_curve_best_model.png)
-*Model ailelerinin ROC eğrisi karşılaştırması.*
+### Sekil 2: Model ailelerinin ROC egrisi karsilastirmasi
+![Model ailelerinin ROC egrisi karsilastirmasi](results/figures/roc_curve_best_model.png)
+*Model ailelerinin ROC egrisi karsilastirmasi.*
 
-### Şekil 3: Precision-Recall eğrisi
-![Precision-Recall eğrisi](results/figures/precision_recall_curve_best_model.png)
-*BATADAL gibi dengesiz veri setinde PR eğrisi ROC'a göre daha bilgilendirici bir metriktir.*
+### Sekil 3: Precision-Recall egrisi
+![Precision-Recall egrisi](results/figures/precision_recall_curve_best_model.png)
+*BATADAL gibi dengesiz veri setinde PR egrisi ROC'a gore daha bilgilendirici bir metriktir.*
 
-### Şekil 4: SKAB için otomata durum geçiş diyagramı
-![SKAB için otomata durum geçiş diyagramı](results/figures/automata_state_diagram_skab.png)
-*SKAB için SAX sembolik temsiliyle oluşturulan olasılıksal otomata durum geçiş diyagramı (`window_size=4`, `alphabet_size=3`).*
+### Sekil 4: SKAB icin otomata durum gecis diyagrami
+![SKAB icin otomata durum gecis diyagrami](results/figures/automata_state_diagram_skab.png)
+*SKAB icin SAX sembolik temsiliyle olusturulan olasiliksal otomata durum gecis diyagrami (`window_size=4`, `alphabet_size=3`).*
 
-### Şekil 5: Geçiş olasılıkları ısı haritası
-![Geçiş olasılıkları ısı haritası](results/figures/transition_probability_heatmap_skab.png)
-*Durumlar arası geçiş olasılıklarının ısı haritası; koyu hücreler yüksek olasılıklı (normal) geçişleri temsil eder.*
+### Sekil 5: Gecis olasiliklari isi haritasi
+![Gecis olasiliklari isi haritasi](results/figures/transition_probability_heatmap_skab.png)
+*Durumlar arasI gecis olasiliklarinin isi haritasi; koyu hucreler yuksek olasilikli (normal) gecisleri temsil eder.*
 
-### Şekil 6: F1 vs window/alphabet
+### Sekil 6: F1 vs window/alphabet
 ![F1 vs window/alphabet](results/automata_analysis/f1_vs_window_alphabet.png)
-*Window size ve alphabet size'ın F1 üzerindeki etkisi.*
+*Window size ve alphabet size'in F1 uzerindeki etkisi.*
 
-### Şekil 7: State sayısı vs window
-![State sayısı vs window](results/automata_analysis/state_count_vs_window.png)
-*Parametre değişiminin state sayısı ve geçiş yoğunluğu üzerindeki etkisi.*
+### Sekil 7: State sayisi vs window
+![State sayisi vs window](results/automata_analysis/state_count_vs_window.png)
+*Parametre degisiminin state sayisi ve gecis yogunlugu uzerindeki etkisi.*
 
-### Şekil 8: Gürültü dayanıklılığı
-![Gürültü dayanıklılığı](results/noise/noise_robustness_plot.png)
-*Artan Gaussian gürültü seviyelerinde (`std=0.05`, `0.10`, `0.20`) model F1 değişimi.*
+### Sekil 8: Gurultu dayanikliligi
+![Gurultu dayanikliligi](results/noise/noise_robustness_plot.png)
+*Artan Gaussian gurultu seviyelerinde (`std=0.05`, `0.10`, `0.20`) model F1 degisimi.*
 
-### Şekil 9: Cross-dataset matrisi
+### Sekil 9: Cross-dataset matrisi
 ![Cross-dataset matrisi](results/cross_dataset/cross_dataset_matrix.png)
-*SKAB↔BATADAL çapraz veri seti genellenebilirlik matrisi.*
+*SKAB<->BATADAL capraz veri seti genellenebilirlik matrisi.*
 
-### Şekil 10: Confidence histogram
+### Sekil 10: Confidence histogram
 ![Confidence histogram](results/explanations/confidence_histogram.png)
-*Automata güven skoru dağılımı: normal ve anomali sınıfları için ayrı.*
+*Automata guven skoru dagilimi: normal ve anomali siniflari icin ayri.*
 
 ## Analiz ve Bulgular
 
-### Model Karşılaştırması
+### Model Karsilastirmasi
 
-Tablo 1 sonuçları, `SKAB` üzerinde dört modelin birbirine görece yakın F1 değerleri ürettiğini göstermektedir. `LSTM` için ortalama F1 `0.4942 ± 0.0539`, `GRU` için `0.4979 ± 0.0468`, `1D-CNN` için `0.4965 ± 0.0774` ve `Automata` için `0.5022 ± 0.0934` elde edilmiştir. Bu tablo, `SKAB` üzerinde derin öğrenme modelleri ile olasılıksal otomata yaklaşımının benzer doğruluk bandında çalıştığını, yani otomata modelinin açıklanabilirlik avantajına rağmen performans açısından tamamen geride kalmadığını göstermektedir.
+Tablo 1 sonuclari, `SKAB` uzerinde dort modelin birbirine gorece yakin F1 degerleri urettigini gostermektedir. `LSTM` icin ortalama F1 `0.4942 +- 0.0539`, `GRU` icin `0.4979 +- 0.0468`, `1D-CNN` icin `0.4965 +- 0.0774` ve `Automata` icin `0.5022 +- 0.0934` elde edilmistir. Bu tablo, `SKAB` uzerinde derin ogrenme modelleri ile olasiliksal otomata yaklasiminin benzer dogruluk bandinda calistigini, yani otomata modelinin aciklanabilirlik avantajina ragmen performans acisindan tamamen geride kalmadigini gostermektedir.
 
-`BATADAL` tarafında ayrım çok daha belirgindir. `LSTM` için F1 `0.1297 ± 0.0412`, `GRU` için `0.1766 ± 0.0509`, `1D-CNN` için `0.0737 ± 0.0466` düzeyinde kalırken `Automata` modeli `0.3053 ± 0.0000` ile daha yüksek bir sonuç üretmiştir. Bu farkın temel nedeni `BATADAL` veri setindeki güçlü sınıf dengesizliğidir. Derin öğrenme modelleri yüksek accuracy üretse bile anomali sınıfını yeterince yakalayamamaktadır; buna karşılık otomata modelinin `BATADAL` için recall değeri `0.7143` seviyesindedir. Bu durum, path probability tabanlı karar mekanizmasının dengesiz sınıf dağılımına karşı doğal bir direnç gösterebildiğini düşündürmektedir. Açıklanabilirlik açısından fark daha da belirgindir: Automata modeli her karar için `state`, `pattern`, `transition_probability` ve `path_probability` alanlarını üretirken derin öğrenme modelleri büyük ölçüde black-box karakterini korumaktadır.
+`BATADAL` tarafinda ayrim cok daha belirgindir. `LSTM` icin F1 `0.1297 +- 0.0412`, `GRU` icin `0.1766 +- 0.0509`, `1D-CNN` icin `0.0737 +- 0.0466` duzeyinde kalirken `Automata` modeli `0.3053 +- 0.0000` ile daha yuksek bir sonuc uretmistir. Bu farkin temel nedeni `BATADAL` veri setindeki guclu sinif dengesizligidir. Derin ogrenme modelleri yuksek accuracy uretse bile anomali sinifini yeterince yakalayamamaktadir; buna karsilik otomata modelinin `BATADAL` icin recall degeri `0.7143` seviyesindedir. Bu durum, path probability tabanli karar mekanizmasinin dengesiz sinif dagilimina karsi dogal bir direnc gosterebildigini dusundurmektedir. Aciklanabilirlik acisindan fark daha da belirgindir: Automata modeli her karar icin `state`, `pattern`, `transition_probability` ve `path_probability` alanlarini uretirken derin ogrenme modelleri buyuk olcude black-box karakterini korumaktadir.
 
-### Veri Setleri Arası Performans Farkları
+### Veri Setleri Arasi Performans Farklari
 
-İki veri seti yapısal olarak oldukça farklıdır. `SKAB`, `source_file` bazlı fold düzeni sayesinde aynı fiziksel kaynaktan gelen örneklerin train ve test arasında karışmasını engelleyen daha kontrollü bir değerlendirme yapısı sunmaktadır. Bu nedenle model ailesi farkları burada daha dengeli görünmektedir. `BATADAL` ise zaman sıralı `%60/%20/%20` ayrım ve düşük anomali oranı nedeniyle daha zor bir problemdir; model yanlışlarının büyük bölümü anomali sınıfını kaçırma yönünde oluşmaktadır.
+Iki veri seti yapisal olarak oldukca farklidir. `SKAB`, `source_file` bazli fold duzeni sayesinde ayni fiziksel kaynaktan gelen orneklerin train ve test arasinda karismasini engelleyen daha kontrollu bir degerlendirme yapisi sunmaktadir. Bu nedenle model ailesi farklari burada daha dengeli gorunmektedir. `BATADAL` ise zaman sirali `%60/%20/%20` ayrim ve dusuk anomali orani nedeniyle daha zor bir problemdir; model yanlislarinin buyuk bolumu anomali sinifini kacirma yonunde olusmaktadir.
 
-Çapraz veri seti sonuçları da bu farkı desteklemektedir. `SKAB -> BATADAL` yönünde en iyi sonuç `1D-CNN` ile `0.3125 ± 0.0299` iken, `BATADAL -> SKAB` yönünde en iyi sonuç `Automata` ile `0.5372 ± 0.0127` olmuştur. Bu deneylerde tüm özelliklerin `PCA` ile `PC1` bileşenine indirgenmesi boyut uyumu sağlamış olsa da, bu indirgeme veri kümeleri arasındaki yapısal farkları tamamen ortadan kaldırmamaktadır. Özellikle `BATADAL -> SKAB` yönünde `Automata` modelinin `recall=1.0` üretmesi ama precision değerinin düşük kalması, modelin anomaliye aşırı duyarlı davranabildiğini göstermektedir.
+Capraz veri seti sonuclari da bu farki desteklemektedir. `SKAB -> BATADAL` yonunde en iyi sonuc `1D-CNN` ile `0.3125 +- 0.0299` iken, `BATADAL -> SKAB` yonunde en iyi sonuc `Automata` ile `0.5372 +- 0.0127` olmustur. Bu deneylerde tum ozelliklerin `PCA` ile `PC1` bilesenine indirgenmesi boyut uyumu saglamis olsa da, bu indirgeme veri kumeleri arasindaki yapisal farklari tamamen ortadan kaldirmamaktadir. Ozellikle `BATADAL -> SKAB` yonunde `Automata` modelinin `recall=1.0` uretmesi ama precision degerinin dusuk kalmasi, modelin anomaliye asiri duyarli davranabildigini gostermektedir.
 
-### Gürültü Etkisi Analizi
+### Gurultu Etkisi Analizi
 
-Tablo 2 ve gürültü deneyleri, `SKAB` üzerinde tüm modellerin Gaussian gürültü altında görece kararlı kaldığını göstermektedir. `LSTM` modeli `0.2632` F1’den `std=0.10` seviyesinde `0.2642`'ye, `GRU` modeli `0.2717`'den `0.2709`'a, `CNN` modeli `0.2789`'dan `0.2790`'a değişmektedir. `Automata` modeli ise `0.0816`'dan `0.0852`'ye hafif artış göstermektedir. `std=0.20` düzeyinde de `SKAB` için tüm modellerde dramatik bir çöküş gözlenmemekte, hatta `Automata` F1’i `0.0884` seviyesine kadar çıkmaktadır.
+Tablo 2 ve gurultu deneyleri, `SKAB` uzerinde tum modellerin Gaussian gurultu altinda gorece kararli kaldigini gostermektedir. `LSTM` modeli `0.2632` F1'den `std=0.10` seviyesinde `0.2642`'ye, `GRU` modeli `0.2717`'den `0.2709`'a, `CNN` modeli `0.2789`'dan `0.2790`'a degismektedir. `Automata` modeli ise `0.0816`'dan `0.0852`'ye hafif artis gostermektedir. `std=0.20` duzeyinde de `SKAB` icin tum modellerde dramatik bir cokus gozlenmemekte, hatta `Automata` F1'i `0.0884` seviyesine kadar cikmaktadir.
 
-`BATADAL` tarafında ise gürültü etkisi veri setinin kendi zorluğunun gölgesinde kalmaktadır. `LSTM` ve `CNN` zaten `0.0000` F1 düzeyinde olduğundan gürültü bu modeller için pratikte yeni bir bozulma yaratmamaktadır. `GRU` modeli `0.0334`'ten `0.0329` ve `0.0295` seviyelerine düşerken, `Automata` modeli `0.2821`'den `0.2677` ve `0.2684` seviyelerine gerilemektedir. SAX temelli sembolik temsil ve pencereleme etkisi, otomata tarafında doğal bir smoothing davranışı oluşturmakta; küçük gürültü dalgalanmaları her zaman dramatik yapısal değişime dönüşmemektedir.
+`BATADAL` tarafinda ise gurultu etkisi veri setinin kendi zorlugunun golgesinde kalmaktadir. `LSTM` ve `CNN` zaten `0.0000` F1 duzeyinde oldugundan gurultu bu modeller icin pratikte yeni bir bozulma yaratmamaktadir. `GRU` modeli `0.0334`'ten `0.0329` ve `0.0295` seviyelerine duserken, `Automata` modeli `0.2821`'den `0.2677` ve `0.2684` seviyelerine gerilemektedir. SAX temelli sembolik temsil ve pencereleme etkisi, otomata tarafinda dogal bir smoothing davranisi olusturmakta; kucuk gurultu dalgalanmalari her zaman dramatik yapisal degisime donusmemektedir.
 
-### Unseen Veri Davranışı
+### Unseen Veri Davranisi
 
-Unseen pattern yönetimi yalnızca `Automata` modeli için anlamlıdır ve Levenshtein eşleştirmesi ile yapılmaktadır. `SKAB` için unseen anomaly detection rate `%100.0`, `BATADAL` için ise `%0.0` olarak ölçülmüştür. Bu sonuç ilk bakışta çelişkili görünebilir; ancak `Det. Rate` ile `Map. Acc.` farklı iki davranışı ölçmektedir. `Det. Rate`, unseen bir örneğin anomali olarak işaretlenip işaretlenmediğini; `Map. Acc.` ise unseen pattern'ın en yakın bilinen pattern'a semantik olarak doğru eşlenip eşlenmediğini ölçer. Dolayısıyla bir sistem, eşleştirme kalitesi kusurlu olsa bile unseen örneği "anomali" olarak yakalayabilir.
+Unseen pattern yonetimi yalnizca `Automata` modeli icin anlamlidir ve Levenshtein eslestirmesi ile yapilmaktadir. `SKAB` icin unseen anomaly detection rate `%100.0`, `BATADAL` icin ise `%0.0` olarak olculmustur. Bu sonuc ilk bakista celiskili gorunebilir; ancak `Det. Rate` ile `Map. Acc.` farkli iki davranisi olcmektedir. `Det. Rate`, unseen bir ornegin anomali olarak isaretlenip isaretlenmedigini; `Map. Acc.` ise unseen pattern'in en yakin bilinen pattern'a semantik olarak dogru eslenip eslenmedigini olcer. Dolayisiyla bir sistem, eslestirme kalitesi kusurlu olsa bile unseen ornegi "anomali" olarak yakalayabilir.
 
-`SKAB` tarafında bu ayrım çok belirgindir: `372` unseen kaydın `125` tanesi gerçek anomalidir ve bu anomalilerin tamamı yakalanmıştır. Ancak aynı anda `247` normal unseen kaydın `217` tanesi de anomali olarak işaretlenmiştir; yani model unseen gördüğünde oldukça hassas davranmakta, bu da `%100` detection rate ile görece düşük mapping accuracy değerinin birlikte ortaya çıkmasına neden olmaktadır. Nitekim `SKAB` için mapping accuracy, Levenshtein uzaklığı `1` ve `2` seviyeleri birlikte düşünüldüğünde yaklaşık `0.3352` düzeyindedir.
+`SKAB` tarafinda bu ayrim cok belirgindir: `372` unseen kaydin `125` tanesi gercek anomalidir ve bu anomalilerin tamami yakalanmistir. Ancak ayni anda `247` normal unseen kaydin `217` tanesi de anomali olarak isaretlenmistir; yani model unseen gordugunde oldukca hassas davranmakta, bu da `%100` detection rate ile gorece dusuk mapping accuracy degerinin birlikte ortaya cikmasina neden olmaktadir. Nitekim `SKAB` icin mapping accuracy, Levenshtein uzakligi `1` ve `2` seviyeleri birlikte dusunuldugunde yaklasik `0.3352` duzeyindedir.
 
-`BATADAL` tarafında ise bağlam daha küçüktür: toplam unseen örnek sayısı `45`, bunların yalnızca `10` tanesi gerçek anomalidir. Bu `10` anomalinin hiçbiri doğru biçimde anomali olarak işaretlenmediği için detection rate `%0.0` çıkmıştır. Buna karşın normal unseen örneklerin bir kısmı yine anomaliye kaymıştır (`35` normal unseen örneğin `10` tanesi false positive). Mapping accuracy burada Levenshtein uzaklığı `1` düzeyinde `0.5556` olarak ölçülmüştür. Bu tablo, unseen pattern yakalamanın her zaman doğru pattern semantiğiyle eşleşme anlamına gelmediğini; ancak yine de modelin açıklanabilir bir fallback mekanizmasına sahip olduğunu göstermektedir.
+`BATADAL` tarafinda ise baglam daha kucuktur: toplam unseen ornek sayisi `45`, bunlarin yalnizca `10` tanesi gercek anomalidir. Bu `10` anomalinin hicbiri dogru bicimde anomali olarak isaretlenmedigi icin detection rate `%0.0` cikmistir. Buna karsin normal unseen orneklerin bir kismi yine anomaliye kaymistir (`35` normal unseen ornegin `10` tanesi false positive). Mapping accuracy burada Levenshtein uzakligi `1` duzeyinde `0.5556` olarak olculmustur. Bu tablo, unseen pattern yakalamanin her zaman dogru pattern semantigiyle eslesme anlamina gelmedigini; ancak yine de modelin aciklanabilir bir fallback mekanizmasina sahip oldugunu gostermektedir.
 
 ### Parametre Etkileri
 
-Tablo 4a ve Tablo 4b, `window_size` ve `alphabet_size` parametrelerinin otomata yapısını doğrudan değiştirdiğini göstermektedir. `alphabet_size=3` sabitken `window_size` değerinin `3`'ten `6`'ya çıkması `SKAB` için ortalama state sayısını `20.68`'den `116.12`'ye, `BATADAL` için ise `26.00`'dan `206.00`'ya yükseltmektedir. Aynı sırada `SKAB` F1 değeri `0.0859` ile `0.0909` arasında sınırlı dalgalanırken, `BATADAL` F1 değeri `0.2500`, `0.2821`, `0.0548` ve `0.3889` gibi daha oynak bir desen göstermektedir.
+Tablo 4a ve Tablo 4b, `window_size` ve `alphabet_size` parametrelerinin otomata yapisini dogrudan degistirdigini gostermektedir. `alphabet_size=3` sabitken `window_size` degerinin `3`'ten `6`'ya cikmasi `SKAB` icin ortalama state sayisini `20.68`'den `116.12`'ye, `BATADAL` icin ise `26.00`'dan `206.00`'ya yukseltmektedir. Ayni sirada `SKAB` F1 degeri `0.0859` ile `0.0909` arasinda sinirli dalgalanirken, `BATADAL` F1 degeri `0.2500`, `0.2821`, `0.0548` ve `0.3889` gibi daha oynak bir desen gostermektedir.
 
-`window_size=4` sabitken `alphabet_size` artışı da benzer şekilde state uzayını genişletmektedir: `SKAB` state sayısı `37.92`'den `137.40`'a, `BATADAL` state sayısı `76.00`'dan `340.00`'a çıkmaktadır. Aynı anda `SKAB` F1 değeri `0.0816`'dan `0.1144` seviyesine kadar yükselip sonra hafif düşerken, `BATADAL` F1 değeri `0.2821`, `0.3065`, `0.2353` ve `0.2584` biçiminde değişmektedir. Bu davranış, daha zengin sembol uzayının daha fazla ifade gücü sağlarken unseen pattern riskini de yükselttiğini göstermektedir.
+`window_size=4` sabitken `alphabet_size` artisi da benzer sekilde state uzayini genisletmektedir: `SKAB` state sayisi `37.92`'den `137.40`'a, `BATADAL` state sayisi `76.00`'dan `340.00`'a cikmaktadir. Ayni anda `SKAB` F1 degeri `0.0816`'dan `0.1144` seviyesine kadar yukselip sonra hafif duserken, `BATADAL` F1 degeri `0.2821`, `0.3065`, `0.2353` ve `0.2584` biciminde degismektedir. Bu davranis, daha zengin sembol uzayinin daha fazla ifade gucu saglarken unseen pattern riskini de yukselttigini gostermektedir.
 
-### Karar Mekanizması Notu
+### Karar Mekanizmasi Notu
 
-İsterde tanımlanan `P(sequence)=∏P(Si→Si+1)` formülü log uzayında hesaplanarak `average_log_probability` elde edilmektedir. Bu dönüşüm çok adımlı geçişlerde oluşabilecek sayısal underflow riskini ortadan kaldırır ve matematiksel olarak eşdeğerdir.
+Isterde tanimlanan `P(sequence)=∏P(Si→Si+1)` formulu log uzayinda hesaplanarak `average_log_probability` elde edilmektedir. Bu donusum cok adimli gecislerde olusabilecek sayisal underflow riskini ortadan kaldirir ve matematiksel olarak esdegerdir.
 
-## Açıklanabilirlik Modülü
+## Aciklanabilirlik Modulu
 
-Automata modeli açıklanabilirdir çünkü karar üretimi kapalı bir latent uzay yerine açık biçimde izlenebilen `state -> pattern -> transition -> decision` zinciri üzerinden gerçekleşir. Her adımda hangi sembolik pattern'in gözlendiği, bunun eğitim sırasında görülüp görülmediği, hangi duruma eşlendiği ve bu geçişin olasılığı ayrı ayrı raporlanır. Böylece model yalnızca bir anomali etiketi üretmez; o kararın hangi geçiş yapısından ve hangi olasılık zincirinden türediğini de gösterir. Confidence score, geçişlerden türetilen path probability ile aynı anlamda kullanılır.
+Automata modeli aciklanabilirdir cunku karar uretimi kapali bir latent uzay yerine acik bicimde izlenebilen `state -> pattern -> transition -> decision` zinciri uzerinden gerceklestirilir. Her adimda hangi sembolik pattern'in gozlendigi, bunun egitim sirasinda gorulup gorulmedigi, hangi duruma eslendigi ve bu gecisin olasiligi ayri ayri raporlanir. Boylece model yalnizca bir anomali etiketi uretmez; o kararin hangi gecis yapisindan ve hangi olasilik zincirinden turedigini de gosterir. Confidence score, gecislerden turetilen path probability ile ayni anlamda kullanilir.
 
-Geçiş olasılığı ve güven skoru:
+Gecis olasiligi ve guven skoru:
 
 ```text
-P(Si → Sj) = Geçiş Sayısı(i→j) / Toplam Çıkış Sayısı(i)
-P(sequence) = P(S0→S1) × P(S1→S2) × ... × P(Sn-1→Sn)
+P(Si -> Sj) = Gecis Sayisi(i->j) / Toplam Cikis Sayisi(i)
+P(sequence) = P(S0->S1) x P(S1->S2) x ... x P(Sn-1->Sn)
 Confidence Score = P(sequence)
 ```
 
-Örnek 1 (seen, normal):
+Ornek 1 (seen, normal):
 
 ```json
 {
   "time_step": 0,
   "state": 8,
-  "previous_state": NaN,
+  "previous_state": null,
   "pattern": "abab",
   "status": "seen",
   "mapped_to": "abab",
@@ -288,7 +298,7 @@ Confidence Score = P(sequence)
 }
 ```
 
-Örnek 2 (unseen, anomali):
+Ornek 2 (unseen, anomali):
 
 ```json
 {
@@ -302,27 +312,27 @@ Confidence Score = P(sequence)
 }
 ```
 
-Counterfactual not: "Unseen anomali pattern'lar için counterfactual analiz de yapılmaktadır: alternatif pattern'lar altında kararın nasıl değişeceği `results/explanations/counterfactual_explanations.json` dosyasında raporlanmıştır."
+Counterfactual not: "Unseen anomali pattern'lar icin counterfactual analiz de yapilmaktadir: alternatif pattern'lar altinda kararin nasil degisecegi `results/explanations/counterfactual_explanations.json` dosyasinda raporlanmistir."
 
-## İstatistiksel Testler
+## Istatistiksel Testler
 
-Wilcoxon signed-rank testi: Sürekli F1 dağılımları arasındaki farkı test eder. `SKAB` için fold bazlı (`5` fold), `BATADAL` için seed bazlı (`5` seed) uygulanmıştır.
+Wilcoxon signed-rank testi: Surekli F1 dagilimlari arasindaki farki test eder. `SKAB` icin fold bazli (`5` fold), `BATADAL` icin seed bazli (`5` seed) uygulanmistir.
 
-McNemar testi: İki modelin ikili tahmin vektörleri arasındaki uyuşmazlığı test eder. Hangi hataların sistematik olduğunu gösterir.
+McNemar testi: Iki modelin ikili tahmin vektorleri arasindaki uyusmazligini test eder. Hangi hatalarin sistematik oldugunu gosterir.
 
-Her iki test için sonuçlar `results/tables/wilcoxon_results.csv` ve `results/tables/mcnemar_results.csv` dosyalarında üretilmiş ve depoya kaydedilmiştir. Wilcoxon sonuçlarında bu veri hacminde çiftler arası farkların çoğu `p < 0.05` eşiğini geçmemiştir; buna karşılık McNemar testi, bazı model çiftlerinde hata örüntülerinin istatistiksel olarak anlamlı biçimde farklılaştığını göstermektedir.
+Her iki test icin sonuclar `results/tables/wilcoxon_results.csv` ve `results/tables/mcnemar_results.csv` dosyalarinda uretilmis ve depoya kaydedilmistir. Wilcoxon sonuclarinda bu veri hacminde ciftler arasindaki farklarin cogu `p < 0.05` esigini gecmemistir; buna karsilik McNemar testi, bazi model ciftlerinde hata oruntulerinin istatistiksel olarak anlamli bicimde farklilastigini gostermektedir.
 
-`5` farklı random seed `[42, 123, 2026, 7, 999]` ile tekrar stratejisi, tek bir rastgele başlangıç noktasına bağlı olmayan güvenilir sonuçlar üretmek için uygulanmıştır.
+`5` farkli random seed `[42, 123, 2026, 7, 999]` ile tekrar stratejisi, tek bir rastgele baslangic noktasina bagli olmayan guvenilir sonuclar uretmek icin uygulanmistir.
 
 ## Kaynaklar
 
-- `SKAB` veri seti ve sensör temelli anomali tespiti literatürü
-- `BATADAL` veri seti ve su dağıtım sistemi saldırı tespiti çalışmaları
-- Wilcoxon signed-rank test literatürü
-- McNemar test literatürü
-- Zaman serilerinde açıklanabilir anomali tespiti ve sembolik temsil yaklaşımları
+- `SKAB` veri seti ve sensor temelli anomali tespiti literaturu
+- `BATADAL` veri seti ve su dagitim sistemi saldiri tespiti calismalari
+- Wilcoxon signed-rank test literaturu
+- McNemar test literaturu
+- Zaman serilerinde aciklanabilir anomali tespiti ve sembolik temsil yaklasimlari
 
-Kod içi başvuru noktaları:
+Kod ici basvuru noktalari:
 
 - `src/models/automata/`
 - `src/experiments/run_automata.py`

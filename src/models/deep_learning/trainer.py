@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import tempfile
 from copy import deepcopy
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -148,10 +150,6 @@ class Trainer:
             raise ValueError("epochs must be positive")
         if early_stopping_patience <= 0:
             raise ValueError("early_stopping_patience must be positive")
-        if early_stopping_monitor not in {"val_loss", "val_f1", "val_recall"}:
-            raise ValueError("early_stopping_monitor must be one of: val_loss, val_f1, val_recall")
-        if early_stopping_mode not in {"min", "max"}:
-            raise ValueError("early_stopping_mode must be 'min' or 'max'")
         if pos_weight_strategy != "neg_pos_ratio":
             raise ValueError("Unsupported pos_weight_strategy")
         if loss_name not in {"bce", "focal"}:
@@ -168,8 +166,18 @@ class Trainer:
         self.device = torch.device(resolved_device)
         self.early_stopping_enabled = early_stopping_enabled
         self.early_stopping_patience = early_stopping_patience
-        self.early_stopping_monitor = early_stopping_monitor
-        self.early_stopping_mode = early_stopping_mode
+        if str(early_stopping_monitor).lower() != "val_loss":
+            print(
+                "Early stopping monitor olarak yalnizca 'val_loss' destekleniyor; "
+                f"'{early_stopping_monitor}' yerine 'val_loss' kullanilacak."
+            )
+        if str(early_stopping_mode).lower() != "min":
+            print(
+                "Early stopping mode olarak yalnizca 'min' destekleniyor; "
+                f"'{early_stopping_mode}' yerine 'min' kullanilacak."
+            )
+        self.early_stopping_monitor = "val_loss"
+        self.early_stopping_mode = "min"
         self.use_pos_weight = use_pos_weight
         self.pos_weight_strategy = pos_weight_strategy
         self.loss_name = loss_name
@@ -203,87 +211,86 @@ class Trainer:
         train_losses: list[float] = []
         validation_losses: list[float] = []
         best_validation_loss = float("inf")
-        best_monitor_value = float("inf") if self.early_stopping_mode == "min" else float("-inf")
+        best_monitor_value = float("inf")
         best_validation_precision = 0.0
         best_validation_recall = 0.0
         best_validation_f1 = 0.0
         best_state_dict = deepcopy(self.model.state_dict())
         best_epoch = 0
         patience_counter = 0
+        best_model_tempfile = tempfile.NamedTemporaryFile(suffix=".pt", delete=False)
+        best_model_path = Path(best_model_tempfile.name)
+        best_model_tempfile.close()
+        torch.save(best_state_dict, best_model_path)
 
-        for epoch_index in range(self.epochs):
-            train_loss = self._run_epoch(train_loader, training=True)
-            validation_result = self._evaluate_loader(validation_loader, threshold=0.5)
-            validation_loss = float(validation_result["loss"])
-            validation_precision = float(validation_result["precision"])
-            validation_recall = float(validation_result["recall"])
-            validation_f1 = float(validation_result["f1_score"])
-            train_losses.append(train_loss)
-            validation_losses.append(validation_loss)
+        try:
+            for epoch_index in range(self.epochs):
+                train_loss = self._run_epoch(train_loader, training=True)
+                validation_result = self._evaluate_loader(validation_loader, threshold=0.5)
+                validation_loss = float(validation_result["loss"])
+                validation_precision = float(validation_result["precision"])
+                validation_recall = float(validation_result["recall"])
+                validation_f1 = float(validation_result["f1_score"])
+                train_losses.append(train_loss)
+                validation_losses.append(validation_loss)
 
-            print(
-                f"Epoch {epoch_index + 1}/{self.epochs} | "
-                f"train_loss: {train_loss:.4f} | "
-                f"val_loss: {validation_loss:.4f} | "
-                f"val_f1: {validation_f1:.4f} | "
-                f"val_recall: {validation_recall:.4f}"
-            )
-
-            monitor_value = {
-                "val_loss": validation_loss,
-                "val_f1": validation_f1,
-                "val_recall": validation_recall,
-            }[self.early_stopping_monitor]
-
-            is_better = (
-                monitor_value < best_monitor_value
-                if self.early_stopping_mode == "min"
-                else monitor_value > best_monitor_value
-            )
-
-            if is_better:
-                best_monitor_value = monitor_value
-                best_validation_loss = validation_loss
-                best_validation_precision = validation_precision
-                best_validation_recall = validation_recall
-                best_validation_f1 = validation_f1
-                best_state_dict = deepcopy(self.model.state_dict())
-                best_epoch = epoch_index + 1
-                patience_counter = 0
-            else:
-                patience_counter += 1
-
-            if self.early_stopping_enabled and patience_counter >= self.early_stopping_patience:
-                print(f"Early stopping at epoch {epoch_index + 1} (best epoch: {best_epoch})")
-                self.model.load_state_dict(best_state_dict)
-                return TrainingHistory(
-                    train_losses=train_losses,
-                    validation_losses=validation_losses,
-                    best_validation_loss=best_validation_loss,
-                    epochs_completed=epoch_index + 1,
-                    best_monitor_name=self.early_stopping_monitor,
-                    best_monitor_value=float(best_monitor_value),
-                    best_validation_precision=float(best_validation_precision),
-                    best_validation_recall=float(best_validation_recall),
-                    best_validation_f1=float(best_validation_f1),
-                    pos_weight=float(self.pos_weight),
-                    loss_name=self.loss_name,
+                print(
+                    f"Epoch {epoch_index + 1}/{self.epochs} | "
+                    f"train_loss: {train_loss:.4f} | "
+                    f"val_loss: {validation_loss:.4f} | "
+                    f"val_f1: {validation_f1:.4f} | "
+                    f"val_recall: {validation_recall:.4f}"
                 )
 
-        self.model.load_state_dict(best_state_dict)
-        return TrainingHistory(
-            train_losses=train_losses,
-            validation_losses=validation_losses,
-            best_validation_loss=best_validation_loss,
-            epochs_completed=len(train_losses),
-            best_monitor_name=self.early_stopping_monitor,
-            best_monitor_value=float(best_monitor_value),
-            best_validation_precision=float(best_validation_precision),
-            best_validation_recall=float(best_validation_recall),
-            best_validation_f1=float(best_validation_f1),
-            pos_weight=float(self.pos_weight),
-            loss_name=self.loss_name,
-        )
+                if validation_loss < best_validation_loss:
+                    best_validation_loss = validation_loss
+                    best_monitor_value = validation_loss
+                    best_validation_precision = validation_precision
+                    best_validation_recall = validation_recall
+                    best_validation_f1 = validation_f1
+                    best_state_dict = deepcopy(self.model.state_dict())
+                    best_epoch = epoch_index + 1
+                    patience_counter = 0
+                    torch.save(best_state_dict, best_model_path)
+                else:
+                    patience_counter += 1
+
+                if self.early_stopping_enabled and patience_counter >= self.early_stopping_patience:
+                    print(f"Early stopping at epoch {epoch_index + 1} (best epoch: {best_epoch})")
+                    best_state_dict = torch.load(best_model_path, map_location=self.device)
+                    self.model.load_state_dict(best_state_dict)
+                    return TrainingHistory(
+                        train_losses=train_losses,
+                        validation_losses=validation_losses,
+                        best_validation_loss=best_validation_loss,
+                        epochs_completed=epoch_index + 1,
+                        best_monitor_name=self.early_stopping_monitor,
+                        best_monitor_value=float(best_monitor_value),
+                        best_validation_precision=float(best_validation_precision),
+                        best_validation_recall=float(best_validation_recall),
+                        best_validation_f1=float(best_validation_f1),
+                        pos_weight=float(self.pos_weight),
+                        loss_name=self.loss_name,
+                    )
+
+            best_state_dict = torch.load(best_model_path, map_location=self.device)
+            self.model.load_state_dict(best_state_dict)
+            return TrainingHistory(
+                train_losses=train_losses,
+                validation_losses=validation_losses,
+                best_validation_loss=best_validation_loss,
+                epochs_completed=len(train_losses),
+                best_monitor_name=self.early_stopping_monitor,
+                best_monitor_value=float(best_monitor_value),
+                best_validation_precision=float(best_validation_precision),
+                best_validation_recall=float(best_validation_recall),
+                best_validation_f1=float(best_validation_f1),
+                pos_weight=float(self.pos_weight),
+                loss_name=self.loss_name,
+            )
+        finally:
+            if best_model_path.exists():
+                best_model_path.unlink()
 
     def predict_logits(self, sequence_data: SequenceDataset) -> np.ndarray:
         data_loader = self._build_dataloader(sequence_data, shuffle=False)

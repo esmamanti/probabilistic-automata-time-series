@@ -1,59 +1,39 @@
-from __future__ import annotations
-
 import pytest
 
-from models.automata.unseen_handler import PatternResolution, UnseenPatternHandler
+from src.models.automata.levenshtein import find_nearest_pattern, levenshtein_distance
 
 
-def test_resolve_returns_seen_when_pattern_exists():
-    handler = UnseenPatternHandler()
+class TestLevenshteinDistance:
+    def test_exact_match(self):
+        sax_vocabulary = {"aab", "abc", "bcc"}
 
-    resolution = handler.resolve("abcd", ["zzzz", "abcd", "abce"])
+        result = find_nearest_pattern("aab", sax_vocabulary)
 
-    assert resolution == PatternResolution(
-        original_pattern="abcd",
-        status="seen",
-        mapped_pattern="abcd",
-        distance=0,
-    )
+        assert result["status"] == "known"
+        assert result["mapped_to"] == "aab"
+        assert result["distance"] == 0
 
+    def test_unseen_one_edit(self):
+        sax_vocabulary = {"aab", "abc", "bcc"}
 
-def test_resolve_maps_unseen_pattern_to_nearest_candidate():
-    handler = UnseenPatternHandler()
+        result = find_nearest_pattern("aac", sax_vocabulary)
 
-    resolution = handler.resolve("abcf", ["abce", "bbbb", "zzzz"])
+        assert result["status"] == "unseen"
+        assert result["mapped_to"] == "aab"
+        assert result["distance"] == 1
 
-    assert resolution.status == "unseen"
-    assert resolution.mapped_pattern == "abce"
-    assert resolution.distance == 1
+    def test_unseen_multiple_candidates(self):
+        sax_vocabulary = {"aab", "bbc", "ccc"}
 
+        result = find_nearest_pattern("abb", sax_vocabulary)
 
-def test_resolve_uses_lexicographic_tiebreak_when_distances_match():
-    handler = UnseenPatternHandler()
+        assert result["status"] == "unseen"
+        assert result["distance"] <= 2
+        assert result["mapped_to"] in sax_vocabulary
 
-    resolution = handler.resolve("abc", ["abd", "abb"])
+    def test_empty_vocabulary(self):
+        with pytest.raises(ValueError, match="vocabulary must contain at least one pattern"):
+            find_nearest_pattern("abc", set())
 
-    assert resolution.status == "unseen"
-    assert resolution.mapped_pattern == "abb"
-    assert resolution.distance == 1
-
-
-def test_resolve_raises_for_empty_known_pattern_list():
-    handler = UnseenPatternHandler()
-
-    with pytest.raises(ValueError, match="known_patterns must contain at least one pattern"):
-        handler.resolve("abcd", [])
-
-
-def test_pattern_resolution_preserves_all_fields():
-    resolution = PatternResolution(
-        original_pattern="adc",
-        status="unseen",
-        mapped_pattern="abc",
-        distance=1,
-    )
-
-    assert resolution.original_pattern == "adc"
-    assert resolution.status == "unseen"
-    assert resolution.mapped_pattern == "abc"
-    assert resolution.distance == 1
+    def test_symmetry(self):
+        assert levenshtein_distance("abc", "bca") == levenshtein_distance("bca", "abc")

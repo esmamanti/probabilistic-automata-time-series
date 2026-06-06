@@ -47,6 +47,12 @@ def transition_density(transition_counts: dict[int, dict[int, int]], state_count
     return float(actual_edges / possible_edges) if possible_edges else 0.0
 
 
+def average_transitions_per_state(transition_counts: dict[int, dict[int, int]], state_count: int) -> float:
+    if state_count <= 0:
+        return 0.0
+    return float(observed_transition_count(transition_counts) / state_count)
+
+
 def evaluate_parameter_setting(
     dataset_name: str,
     prepared_dataset,
@@ -84,6 +90,7 @@ def evaluate_parameter_setting(
     state_count = len(model.state_generator.pattern_to_state)
     transition_counts = model.transition_counts_ or {}
     transition_count = observed_transition_count(transition_counts)
+    avg_transitions_per_state = average_transitions_per_state(transition_counts, state_count)
 
     return attach_context_to_record({
         "dataset": dataset_name.upper(),
@@ -96,6 +103,7 @@ def evaluate_parameter_setting(
         "transition_count": int(transition_count),
         "transition_sources": int(len(transition_counts)),
         "transition_density": transition_density(transition_counts, state_count),
+        "avg_transitions_per_state": avg_transitions_per_state,
         "unseen_examples": int(sum(row["status"] == "unseen" for row in score_result["explanations"])),
     }, build_run_context(
         config=config,
@@ -119,6 +127,7 @@ def build_parameter_analysis_summary(results_df: pd.DataFrame) -> pd.DataFrame:
         "transition_count",
         "transition_sources",
         "transition_density",
+        "avg_transitions_per_state",
         "unseen_examples",
     ]
     available_metric_columns = [column for column in metric_columns if column in results_df.columns]
