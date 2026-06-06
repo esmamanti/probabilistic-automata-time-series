@@ -207,6 +207,40 @@ def plot_precision_recall_curve(
     return figure
 
 
+def plot_precision_recall_curve_with_threshold(
+    y_true,
+    y_score,
+    *,
+    threshold: float,
+    title: str = "Precision-Recall Curve",
+    threshold_label: str | None = None,
+) -> plt.Figure:
+    validate_binary_targets(y_true)
+    curve_df = build_curve_frame("precision_recall", y_true, y_score)
+
+    valid_thresholds = curve_df["threshold"].notna()
+    if valid_thresholds.any():
+        threshold_distances = (curve_df.loc[valid_thresholds, "threshold"] - float(threshold)).abs()
+        marker_index = threshold_distances.idxmin()
+        marker_recall = float(curve_df.loc[marker_index, "recall"])
+        marker_precision = float(curve_df.loc[marker_index, "precision"])
+    else:
+        marker_recall = float("nan")
+        marker_precision = float("nan")
+
+    figure, axis = plt.subplots(figsize=(5, 4))
+    axis.plot(curve_df["recall"], curve_df["precision"], label="PR")
+    if np.isfinite(marker_recall) and np.isfinite(marker_precision):
+        label = threshold_label or f"Best threshold = {float(threshold):.2f}"
+        axis.scatter([marker_recall], [marker_precision], color="#d62728", s=50, zorder=3, label=label)
+    axis.set_title(title)
+    axis.set_xlabel("Recall")
+    axis.set_ylabel("Precision")
+    axis.legend()
+    figure.tight_layout()
+    return figure
+
+
 def plot_metric_bars(
     metrics_df: pd.DataFrame,
     *,

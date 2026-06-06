@@ -16,6 +16,7 @@ from evaluation.plots import (
     plot_confusion_matrix,
     plot_parameter_sensitivity,
     plot_precision_recall_curve,
+    plot_precision_recall_curve_with_threshold,
     plot_roc_curve,
     plot_transition_probability_heatmap,
     save_figure,
@@ -110,6 +111,39 @@ def generate_confusion_and_curve_figures(figures_dir: Path) -> list[Path]:
     return output_paths
 
 
+def generate_batadal_threshold_figure(figures_dir: Path) -> Path | None:
+    predictions_df = load_deep_learning_predictions()
+    metrics_path = PROJECT_ROOT / "results" / "tables" / "deep_learning_metrics.csv"
+    metrics_df = pd.read_csv(metrics_path, low_memory=False)
+    batadal_metrics = metrics_df[
+        (metrics_df["dataset"].astype(str).str.upper() == "BATADAL")
+        & (metrics_df["version"].astype(str) == "tuned_threshold_weighted_loss")
+    ].copy()
+    if batadal_metrics.empty:
+        return None
+
+    best_row = batadal_metrics.sort_values(["f1_score", "recall", "precision"], ascending=[False, False, False], kind="stable").iloc[0]
+    best_slice = predictions_df[
+        (predictions_df["dataset"].astype(str).str.upper() == "BATADAL")
+        & (predictions_df["model"].astype(str).str.upper() == str(best_row["model"]).upper())
+        & (predictions_df["split"].astype(str) == str(best_row["split"]))
+        & (predictions_df["seed"].astype(int) == int(best_row["seed"]))
+        & (predictions_df["version"].astype(str) == "tuned_threshold_weighted_loss")
+    ].copy()
+    if best_slice.empty:
+        return None
+
+    threshold = float(best_row["threshold"])
+    figure = plot_precision_recall_curve_with_threshold(
+        best_slice["true_label"],
+        best_slice["predicted_probability"],
+        threshold=threshold,
+        title=f"BATADAL PR Curve - {best_row['model']} (seed={int(best_row['seed'])})",
+        threshold_label=f"Best threshold = {threshold:.2f}",
+    )
+    return save_figure(figure, figures_dir / "batadal_pr_curve_with_threshold.png")
+
+
 def generate_automata_figures(figures_dir: Path, config: dict, models_config: dict) -> list[Path]:
     model = build_automata_artifacts_for_skab(config, models_config)
     transition_probabilities = model.transition_probabilities_ or {}
@@ -159,6 +193,9 @@ def main() -> None:
 
     generated_paths: list[Path] = []
     generated_paths.extend(generate_confusion_and_curve_figures(figures_dir))
+    batadal_threshold_figure = generate_batadal_threshold_figure(figures_dir)
+    if batadal_threshold_figure is not None:
+        generated_paths.append(batadal_threshold_figure)
     generated_paths.extend(generate_automata_figures(figures_dir, config, models_config))
     generated_paths.append(generate_parameter_sensitivity_figure(figures_dir))
 

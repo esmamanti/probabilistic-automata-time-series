@@ -61,9 +61,21 @@ def _filter_requested_pairs(results_df: pd.DataFrame) -> pd.DataFrame:
 
 def _format_results(results_df: pd.DataFrame, *, dataset_name: str) -> pd.DataFrame:
     if results_df.empty:
-        return pd.DataFrame(columns=["dataset", "model_a", "model_b", "statistic", "p_value", "significant"])
+        return pd.DataFrame(
+            columns=[
+                "dataset",
+                "model_a",
+                "model_b",
+                "n_pairs",
+                "mean_difference",
+                "median_difference",
+                "statistic",
+                "p_value",
+                "significant",
+            ]
+        )
 
-    formatted = results_df.loc[:, ["model_a", "model_b", "statistic", "p_value"]].copy()
+    formatted = results_df.loc[:, ["model_a", "model_b", "n_pairs", "mean_difference", "median_difference", "statistic", "p_value"]].copy()
     formatted.insert(0, "dataset", dataset_name.upper())
     formatted["significant"] = formatted["p_value"].astype(float) < 0.05
     return formatted
