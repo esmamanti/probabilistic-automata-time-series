@@ -224,16 +224,14 @@ def build_report_markdown(
     runtime_summary: pd.DataFrame,
 ) -> str:
     lines: list[str] = [
-        "---",
-        "## Proje Notlari",
+        "# Ek Tablo Raporu",
         "",
-        "Bu rapor SKAB ve BATADAL veri setleri uzerinde calismaktadir.",
-        "---",
+        "Bu belge destekleyici tablolari tutar. Final sonuclarin ana kaynagi `reports/final_report.md` dosyasidir.",
         "",
-        "## Tablo 1: Model Performansi ve Stabilitesi (Ortalama F1-score +- Standart Sapma)",
+        "## Tablo 1 - Model Performansi ve Stabilitesi",
         "",
-        "| Model    | SKAB            | BATADAL         |",
-        "|----------|-----------------|-----------------|",
+        "| Model | SKAB (F1 +- std) | BATADAL (F1 +- std) |",
+        "|-------|------------------|---------------------|",
     ]
 
     for model_name in MODEL_ORDER:
@@ -244,13 +242,10 @@ def build_report_markdown(
     lines.extend(
         [
             "",
-            "*5 farkli random seed [42, 123, 2026, 7, 999] ile elde edilen ortalama ve standart sapma.",
-            "SKAB icin GroupKFold (k=5) fold ortalamasi alinmistir.*",
+            "## Tablo 2 - Gurultu Etkisi ve Unseen Senaryo Analizi",
             "",
-            "## Tablo 2: Gurultu Etkisi ve Unseen Senaryo Analizi",
-            "",
-            "| Model    | Orijinal F1 | Gurultulu F1 | F1 Degisimi | Unseen Det. Rate | Unseen Map. Acc. |",
-            "|----------|-------------|--------------|-------------|------------------|------------------|",
+            "| Model | Orijinal F1 | Gurultulu F1 | F1 Degisimi | Unseen Det. Rate | Unseen Map. Acc. |",
+            "|-------|-------------|--------------|-------------|------------------|------------------|",
         ]
     )
 
@@ -266,25 +261,22 @@ def build_report_markdown(
     lines.extend(
         [
             "",
-            "## Tablo 4a: Automata Parametre Duyarlilik Analizi - F1-score (BATADAL)",
+            "## Tablo 4a - Automata F1-score Matrisi (BATADAL)",
             "",
             *markdown_grid_table(f1_table),
             "",
-            "## Tablo 4b: Automata Parametre Duyarlilik Analizi - State Sayisi",
+            "## Tablo 4b - Automata State Sayisi Matrisi (BATADAL)",
             "",
             *markdown_grid_table(state_table),
             "",
-            "## Tablo 4c: Gecis Yogunlugu (Transition Density)",
-            "",
-            "Gecis yogunlugu = toplam gecis sayisi / (state sayisi ^ 2)",
-            "(Her parametre kombinasyonu icin hesaplandi)",
+            "## Tablo 4c - Automata Gecis Yogunlugu Matrisi (BATADAL)",
             "",
             *markdown_grid_table(density_table),
             "",
-            "## Tablo 5: Modellerin Calisma Suresi",
+            "## Tablo 5 - Egitim ve Cikarim Sureleri",
             "",
-            "| Model    | SKAB Egitim (sn) | SKAB Inference (sn) | BATADAL Egitim (sn) | BATADAL Inference (sn) |",
-            "|----------|------------------|---------------------|---------------------|------------------------|",
+            "| Model | SKAB Egitim (sn) | SKAB Inference (sn) | BATADAL Egitim (sn) | BATADAL Inference (sn) |",
+            "|-------|------------------|---------------------|---------------------|------------------------|",
         ]
     )
 

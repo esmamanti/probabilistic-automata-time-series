@@ -22,7 +22,9 @@ results/logs/
 .DS_Store
 
 .test-figures-*/
+.test-probability-export-*/
 .test-run-all-*/
+.pytest_tmp/
 
 # Keep report-ready outputs, ignore bulky raw artifacts.
 results/**

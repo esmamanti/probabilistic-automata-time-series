@@ -76,6 +76,11 @@ STAGE_OUTPUTS = {
     ],
 }
 
+STATISTICAL_TEST_REQUIRED_INPUTS = [
+    "results/tables/model_comparison_metrics_summary.csv",
+    "results/explanations/deep_learning_predictions.csv",
+]
+
 
 def _path_to_label(path: Path) -> str:
     try:
@@ -119,6 +124,10 @@ def _stage_paths(stage_name: str) -> list[Path]:
 def _stage_is_complete(stage_name: str) -> bool:
     expected_paths = _stage_paths(stage_name)
     return bool(expected_paths) and all(path.exists() and path.stat().st_size > 0 for path in expected_paths)
+
+
+def _stage_inputs_exist(relative_paths: list[str]) -> bool:
+    return all((PROJECT_ROOT / relative_path).exists() for relative_path in relative_paths)
 
 
 def _write_progress(config: dict, stage_name: str, status: str) -> None:
@@ -265,13 +274,18 @@ def main() -> None:
             resume_existing=resume_existing,
         )
 
-    _run_stage(
-        config=config,
-        stage_name="statistical_tests",
-        label="Statistical Tests",
-        runner=run_statistical_tests.main,
-        resume_existing=resume_existing,
-    )
+    if _stage_inputs_exist(STATISTICAL_TEST_REQUIRED_INPUTS):
+        _run_stage(
+            config=config,
+            stage_name="statistical_tests",
+            label="Statistical Tests",
+            runner=run_statistical_tests.main,
+            resume_existing=resume_existing,
+        )
+    else:
+        print()
+        print("=== Skipping Statistical Tests (required prediction/summary inputs are missing) ===")
+        _write_progress(config, "statistical_tests", "skipped_missing_inputs")
 
     if any(bool(enabled) for enabled in plots_config.values()):
         _run_stage(

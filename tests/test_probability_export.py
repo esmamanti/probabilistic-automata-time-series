@@ -1,11 +1,15 @@
 from pathlib import Path
+from uuid import uuid4
 
 import pandas as pd
 
 from experiments.run_deep_models import build_probability_distribution_frame
 
 
-def test_probability_distribution_csv_can_be_produced(tmp_path: Path):
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_probability_distribution_csv_can_be_produced():
     frame = build_probability_distribution_frame(
         dataset_name="SKAB",
         model_name="LSTM",
@@ -14,7 +18,9 @@ def test_probability_distribution_csv_can_be_produced(tmp_path: Path):
         probabilities=[0.1, 0.8, 0.4],
         true_labels=[0, 1, 0],
     )
-    output_path = tmp_path / "probability_distribution.csv"
+    output_dir = PROJECT_ROOT / f".test-probability-export-{uuid4().hex}"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / "probability_distribution.csv"
     frame.to_csv(output_path, index=False)
 
     reloaded = pd.read_csv(output_path)

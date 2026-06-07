@@ -62,6 +62,7 @@ def test_build_model_supports_cnn_architecture_from_config():
             "dropout": 0.1,
             "output_size": 1,
         },
+        input_feature_count=1,
     )
 
     assert isinstance(model, CNNModel)
